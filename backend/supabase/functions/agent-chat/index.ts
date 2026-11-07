@@ -8,17 +8,18 @@
 //
 // Environment / secrets:
 //   GEMINI_API_KEY        (required)  Google AI Studio key
-//   GEMINI_MODEL          (optional)  default model id, default "gemini-flash-latest"
+//   GEMINI_MODEL          (optional)  default model id, default "gemini-3.5-flash-lite"
 //   DAILY_REQUEST_LIMIT   (optional)  per-install requests per UTC day, default 300
 //   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are injected by Supabase automatically.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
-const DEFAULT_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-flash-latest";
+const DEFAULT_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.5-flash-lite";
 const DAILY_LIMIT = Number(Deno.env.get("DAILY_REQUEST_LIMIT") ?? "300");
 
 const MAX_BODY_BYTES = 400_000;
+const UPSTREAM_TIMEOUT_MS = 45_000;
 const MAX_CONTENTS = 80;
 const MAX_TOOLS = 32;
 const MAX_SYSTEM_CHARS = 12_000;
@@ -63,6 +64,7 @@ async function mapUpstreamError(res: Response): Promise<Response> {
     const body = await res.json();
     detail = body?.error?.message ?? "";
   } catch (_) { /* ignore */ }
+  console.warn("gemini upstream error", res.status, detail.slice(0, 300));
   const lower = detail.toLowerCase();
   if (res.status === 400 && lower.includes("api key")) {
     return errorResponse(401, "invalid_api_key", "Gemini rejected GEMINI_API_KEY: " + detail.slice(0, 160));
@@ -74,7 +76,7 @@ async function mapUpstreamError(res: Response): Promise<Response> {
     return errorResponse(404, "model_not_found", "Model not available for this key: " + detail.slice(0, 200));
   }
   if (res.status === 429) {
-    return errorResponse(429, "quota_exceeded", "Gemini free-tier quota reached. Wait a minute and try again.");
+    return errorResponse(429, "quota_exceeded", "Gemini quota reached: " + detail.slice(0, 220));
   }
   return errorResponse(502, "upstream_error", "Gemini error " + res.status + ": " + detail.slice(0, 300));
 }
@@ -155,11 +157,21 @@ async function handleChat(body: any, apiKey: string): Promise<Response> {
     geminiBody.toolConfig = { functionCallingConfig: { mode: "AUTO" } };
   }
 
-  const upstream = await fetch(`${GEMINI_BASE}/models/${model}:streamGenerateContent?alt=sse`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-    body: JSON.stringify(geminiBody),
-  });
+  // Time limit applies only until Gemini starts answering; the stream itself may run longer.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(new DOMException("timeout", "TimeoutError")), UPSTREAM_TIMEOUT_MS);
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${GEMINI_BASE}/models/${model}:streamGenerateContent?alt=sse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify(geminiBody),
+      signal: ctrl.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+  console.log("gemini chat", model, upstream.status);
   if (!upstream.ok || !upstream.body) return await mapUpstreamError(upstream);
 
   // Pass the SSE stream straight through to the app.
@@ -248,6 +260,9 @@ Deno.serve(async (req: Request) => {
     if (mode === "models") return await handleModels(apiKey);
     return errorResponse(400, "bad_request", "unknown mode");
   } catch (e) {
+    if (e instanceof DOMException && (e.name === "TimeoutError" || e.name === "AbortError")) {
+      return errorResponse(504, "upstream_error", "Gemini did not respond in time. Please try again.");
+    }
     console.error("agent-chat failure", e);
     return errorResponse(500, "internal_error", "Unexpected server error.");
   }

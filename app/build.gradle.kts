@@ -22,12 +22,12 @@ android {
         applicationId = "com.orbit.agent"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
 
         buildConfigField("String", "SUPABASE_URL", "\"${secret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secret("SUPABASE_ANON_KEY")}\"")
-        buildConfigField("String", "DEFAULT_MODEL", "\"gemini-flash-latest\"")
+        buildConfigField("String", "DEFAULT_MODEL", "\"gemini-3.5-flash-lite\"")
     }
 
     buildTypes {

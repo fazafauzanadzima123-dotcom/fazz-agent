@@ -94,7 +94,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onOpenMemory: () -
                     label = { Text("Gemini model ID") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    supportingText = { Text("Default: gemini-flash-latest (Google's alias for the current Flash model).") },
+                    supportingText = { Text("Default: gemini-3.5-flash-lite (has free-tier quota). Use Test connection to see others.") },
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { vm.setModel(modelText) }, enabled = modelText.isNotBlank() && modelText != settings?.modelId) { Text("Save model") }

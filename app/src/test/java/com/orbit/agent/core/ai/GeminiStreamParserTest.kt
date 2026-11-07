@@ -44,6 +44,18 @@ class GeminiStreamParserTest {
         assertTrue(events.isEmpty())
     }
 
+    @Test fun `empty trailing text part is dropped (real Gemini output)`() {
+        val events = feed("""data: {"candidates": [{"content": {"parts": [{"text": ""}],"role": "model"},"finishReason": "STOP","index": 0}]}""", "")
+        assertEquals(listOf<AiStreamEvent>(AiStreamEvent.Finished("STOP")), events)
+    }
+
+    @Test fun `real Gemini function call with id is parsed`() {
+        val events = feed("""data: {"candidates": [{"content": {"parts": [{"functionCall": {"name": "get_device_info","args": {},"id": "call_58"},"thoughtSignature": "EmAK"}],"role": "model"},"index": 0}]}""", "")
+        val call = events.single() as AiStreamEvent.FunctionCall
+        assertEquals("call_58", call.id)
+        assertEquals("get_device_info", call.name)
+    }
+
     @Test fun `thought parts are not shown as text`() {
         val events = feed("""data: {"candidates":[{"content":{"parts":[{"text":"secret reasoning","thought":true}]}}]}""", "")
         assertTrue(events.single() is AiStreamEvent.OtherPart)

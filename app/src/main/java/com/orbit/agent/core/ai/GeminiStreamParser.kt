@@ -57,6 +57,8 @@ class GeminiStreamParser {
                 val fc = part["functionCall"] as? JsonObject
                 val text = (part["text"] as? JsonPrimitive)?.contentOrNull
                 when {
+                    // Gemini often ends a stream with {"text": ""}; echoing it back can be rejected.
+                    text != null && text.isEmpty() && part.keys == setOf("text") -> Unit
                     fc != null -> {
                         val name = (fc["name"] as? JsonPrimitive)?.contentOrNull.orEmpty()
                         val args = fc["args"] as? JsonObject ?: JsonObject(emptyMap())
