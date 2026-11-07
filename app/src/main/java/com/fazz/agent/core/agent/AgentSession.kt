@@ -143,7 +143,7 @@ class AgentSession(
                     ev.result.errorCode == ErrorCodes.USER_DECLINED || ev.result.errorCode == ErrorCodes.PERMISSION_DENIED -> ToolStatus.DENIED
                     else -> ToolStatus.FAILED
                 }
-                updateMessage(id) { m -> m.copy(tools = m.tools.map { t -> if (t.callId == ev.callId) t.copy(status = status, detail = ev.result.summary) else t }) }
+                updateMessage(id) { m -> m.copy(tools = m.tools.map { t -> if (t.callId == ev.callId) t.copy(status = status, detail = ev.result.summary) else t }, artifacts = ev.result.artifact?.let { a -> m.artifacts + a } ?: m.artifacts) }
                 _state.update { it.copy(agentState = AgentState.Thinking, agentStatus = "Berpikir") }
             }
             is AgentEvent.Usage -> Unit // token counts are not shown to the user

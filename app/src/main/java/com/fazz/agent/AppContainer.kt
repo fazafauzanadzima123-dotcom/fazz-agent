@@ -37,6 +37,7 @@ import com.fazz.agent.core.tools.impl.MediaControlTool
 import com.fazz.agent.core.tools.impl.NavigateTool
 import com.fazz.agent.core.tools.impl.OpenAppTool
 import com.fazz.agent.core.tools.impl.OpenUrlTool
+import com.fazz.agent.core.tools.impl.CreateArtifactTool
 import com.fazz.agent.core.tools.impl.ReadCalendarTool
 import com.fazz.agent.core.tools.impl.ReadNotificationsTool
 import com.fazz.agent.core.tools.impl.RememberTool
@@ -99,7 +100,7 @@ class AppContainer(context: Context) {
         ReadScreenTool(screen), TapTool(screen), TypeTextTool(screen), ScrollTool(screen), PressKeyTool(screen),
         SwipeTool(screen), LookAtScreenTool(screen), WaitTool(),
         // Memory & approval
-        RememberTool(memory), AskConfirmationTool(gateway),
+        RememberTool(memory), AskConfirmationTool(gateway), CreateArtifactTool(),
     )
 
     val toolRegistry = ToolRegistry(allTools(interaction))

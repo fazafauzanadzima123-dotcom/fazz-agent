@@ -177,7 +177,7 @@ fun NoticeLine(message: ChatMessage) {
 /** Fazz's answer: no bubble, collapsible agent steps, and copy / retry / read-aloud actions. */
 @Composable
 @Suppress("DEPRECATION")
-fun AssistantMessage(message: ChatMessage, isLast: Boolean, onRetry: () -> Unit, onSpeak: (String) -> Unit) {
+fun AssistantMessage(message: ChatMessage, isLast: Boolean, onRetry: () -> Unit, onSpeak: (String) -> Unit, onOpenArtifact: (com.fazz.agent.domain.models.Artifact) -> Unit = {}) {
     val colors = MaterialTheme.colorScheme
     val clipboard = LocalClipboardManager.current
     Column(Modifier.fillMaxWidth().animateContentSize()) {
@@ -192,6 +192,10 @@ fun AssistantMessage(message: ChatMessage, isLast: Boolean, onRetry: () -> Unit,
             )
         } else if (message.isStreaming && message.tools.isEmpty()) {
             Row(verticalAlignment = Alignment.CenterVertically) { AgentOrb(OrbMode.THINKING, 22.dp); Spacer(Modifier.width(8.dp)); TypingDots() }
+        }
+        message.artifacts.forEach { a ->
+            Spacer(Modifier.height(10.dp))
+            ArtifactCard(a) { onOpenArtifact(a) }
         }
         message.error?.let { ErrorCard(it, onRetry) }
         if (!message.isStreaming && message.text.isNotBlank()) {

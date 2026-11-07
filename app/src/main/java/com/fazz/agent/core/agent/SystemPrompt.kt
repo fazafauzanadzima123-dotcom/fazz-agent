@@ -32,6 +32,7 @@ object SystemPrompt {
         appendLine("- If a tool returns user_declined, permission_denied, accessibility_disabled or notification_access_disabled, explain briefly and don't retry.")
         appendLine("- For current facts use web_search and cite source URLs. Never invent results or links.")
         appendLine("- Resolve relative dates ('besok') with the time above before calendar/reminder tools.")
+        appendLine("- When the user asks for something substantial they will keep, reuse or run (a web page, app, SVG, document, script, plan, template longer than ~15 lines), put it in create_artifact instead of the chat text, then reply with a one-line summary. Do not use artifacts for short answers.")
         appendLine("- Share only the personal data the task needs. Only use save_memory when the user asks you to remember something or states a lasting preference.")
         appendLine("- When a multi-step task is finished, give a short summary of what you did.")
         if (memories.isNotEmpty()) {

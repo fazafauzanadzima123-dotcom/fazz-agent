@@ -45,6 +45,8 @@ data class ToolResult(
     val errorCode: String? = null,
     /** Optional image (JPEG) sent to the model alongside the result, e.g. a screenshot. */
     val imageJpeg: ByteArray? = null,
+    /** Optional artifact shown to the user as a card in the chat (never sent back to the model). */
+    val artifact: com.fazz.agent.domain.models.Artifact? = null,
 ) {
     /** What the model receives as functionResponse.response. */
     fun toModelResponse(): JsonObject = if (success) {

@@ -38,6 +38,7 @@ import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.Psychology
+import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.AlertDialog
@@ -86,6 +87,7 @@ import com.fazz.agent.data.local.ConversationMeta
 import com.fazz.agent.domain.models.MessageRole
 import com.fazz.agent.presentation.components.AgentActivityIndicator
 import com.fazz.agent.presentation.components.AgentOrb
+import com.fazz.agent.presentation.components.ArtifactViewer
 import com.fazz.agent.presentation.components.AssistantMessage
 import com.fazz.agent.presentation.components.Composer
 import com.fazz.agent.presentation.components.Greeting
@@ -128,6 +130,8 @@ fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit, onOpenMemory: () -
     val snackbar = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var showAttach by remember { mutableStateOf(false) }
+    var openArtifact by remember { mutableStateOf<com.fazz.agent.domain.models.Artifact?>(null) }
+    openArtifact?.let { ArtifactViewer(it) { openArtifact = null } }
     var cameraFile by remember { mutableStateOf<File?>(null) }
 
     val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -215,7 +219,7 @@ fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit, onOpenMemory: () -
                                 when (m.role) {
                                     MessageRole.USER -> UserBubble(m)
                                     MessageRole.NOTICE -> NoticeLine(m)
-                                    MessageRole.ASSISTANT -> AssistantMessage(m, isLast = i == lastAssistant, onRetry = vm::retryLast, onSpeak = vm::speak)
+                                    MessageRole.ASSISTANT -> AssistantMessage(m, isLast = i == lastAssistant, onRetry = vm::retryLast, onSpeak = vm::speak, onOpenArtifact = { openArtifact = it })
                                 }
                             }
                         }
@@ -393,6 +397,10 @@ private fun HistoryDrawer(
                 }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            DrawerItem(Icons.Rounded.School, "Fazz Academy") {
+                runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://fazz-agent.vercel.app/academy/")).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+            }
             DrawerItem(Icons.Rounded.Tune, "Pengaturan", onSettings)
             Spacer(Modifier.height(10.dp))
         }

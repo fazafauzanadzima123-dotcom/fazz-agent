@@ -35,6 +35,20 @@ data class ChatMessage(
     val viaVoice: Boolean = false,
     /** Paths of attached images (app-private files). */
     val images: List<String> = emptyList(),
+    /** Documents/pages/code Fazz created for the user, opened in a side viewer. */
+    val artifacts: List<Artifact> = emptyList(),
+)
+
+@Serializable
+enum class ArtifactType { HTML, SVG, MARKDOWN, CODE }
+
+@Serializable
+data class Artifact(
+    val id: String,
+    val title: String,
+    val type: ArtifactType,
+    val content: String,
+    val language: String = "",
 )
 
 @Serializable

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="darkreader-lock">
+<title>Fazz Academy</title>
+<meta name="description" content="Belajar memakai Fazz Agent: dari chat pertama sampai tugas otomatis di aplikasi lain. Gratis, dalam Bahasa Indonesia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --kain: #F3EEE3; --kertas: #FBF8F1; --tinta: #1E1C19; --nila: #2E4A7D; --nila-muda: #DCE3F0;
+    --tanah: #6F675C; --garis: #DDD4C4; --ok: #3F7D4E;
+    --serif: "Instrument Serif", Georgia, serif; --sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--kain); color: var(--tinta); font: 16px/1.65 var(--sans); }
+  a { color: var(--nila); }
+  header.bar { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--garis); background: var(--kain); position: sticky; top: 0; z-index: 5; }
+  .brand { font-family: var(--serif); font-size: 24px; text-decoration: none; color: var(--tinta); }
+  .brand span { color: var(--nila); }
+  .bar nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+  .bar nav a { text-decoration: none; color: var(--tanah); }
+  .bar nav a:hover { color: var(--tinta); }
+  main { max-width: 1040px; margin: 0 auto; padding: 0 24px 80px; }
+  .hero { padding: 72px 0 36px; max-width: 680px; }
+  .hero h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 7vw, 64px); line-height: 1.05; margin: 0 0 16px; }
+  .hero p { color: var(--tanah); font-size: 18px; margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; margin-top: 28px; }
+  .course { display: flex; flex-direction: column; gap: 8px; background: var(--kertas); border: 1px solid var(--garis); border-radius: 18px; padding: 22px; text-decoration: none; color: inherit; transition: border-color .15s; }
+  .course:hover { border-color: var(--nila); }
+  .course h3 { font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.15; margin: 0; }
+  .course p { margin: 0; color: var(--tanah); font-size: 15px; }
+  .meta { margin-top: auto; padding-top: 8px; font-size: 13px; color: var(--tanah); }
+  .chip { display: inline-block; font-size: 12px; font-weight: 600; background: var(--nila-muda); color: var(--nila); padding: 3px 10px; border-radius: 99px; }
+  /* course view */
+  .layout { display: grid; grid-template-columns: 260px 1fr; gap: 40px; padding-top: 36px; }
+  .side { position: sticky; top: 76px; align-self: start; }
+  .side h4 { font-family: var(--serif); font-weight: 400; font-size: 22px; margin: 0 0 12px; }
+  .side a.lesson { display: flex; gap: 10px; padding: 9px 12px; border-radius: 12px; text-decoration: none; color: var(--tanah); font-size: 14.5px; }
+  .side a.lesson.on { background: var(--kertas); color: var(--tinta); border: 1px solid var(--garis); padding: 8px 11px; }
+  .side a.lesson .tick { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--garis); flex: none; margin-top: 2px; }
+  .side a.lesson.done .tick { background: var(--ok); border-color: var(--ok); }
+  article h2 { font-family: var(--serif); font-weight: 400; font-size: 40px; line-height: 1.1; margin: 0 0 18px; }
+  article h3 { font-size: 18px; margin: 28px 0 6px; }
+  article p, article li { max-width: 62ch; }
+  article code { background: var(--kertas); border: 1px solid var(--garis); border-radius: 6px; padding: 1px 6px; font-size: 14px; }
+  .tip { background: var(--nila-muda); border-radius: 14px; padding: 14px 18px; max-width: 62ch; font-size: 15px; margin: 22px 0; }
+  .btns { display: flex; gap: 10px; margin-top: 32px; flex-wrap: wrap; }
+  button, .btn { font: inherit; font-weight: 600; font-size: 15px; border-radius: 99px; padding: 11px 20px; cursor: pointer; text-decoration: none; display: inline-block; }
+  .primary { background: var(--tinta); color: var(--kertas); border: 0; }
+  .ghost { background: transparent; color: var(--tinta); border: 1px solid var(--garis); }
+  .crumb { font-size: 14px; color: var(--tanah); margin-bottom: 4px; }
+  .progress { height: 6px; background: var(--garis); border-radius: 9px; overflow: hidden; margin: 6px 0 18px; }
+  .progress i { display: block; height: 100%; background: var(--nila); }
+  footer { border-top: 1px solid var(--garis); padding: 24px; text-align: center; color: var(--tanah); font-size: 14px; }
+  :focus-visible { outline: 2px solid var(--nila); outline-offset: 2px; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; gap: 16px; } .side { position: static; } .bar nav { display: none; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .course { transition: none; } }
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="#/">Fazz <span>Academy</span></a>
+  <nav><a href="/">Fazz Agent</a><a href="/#pasang">Unduh</a><a href="https://github.com/fazafauzanadzima123-dotcom/fazz-agent">GitHub</a></nav>
+</header>
+<main id="app"></main>
+<footer>Fazz Academy · materi gratis untuk pengguna Fazz Agent · <a href="/">fazz-agent.vercel.app</a></footer>
+
+<script>
+const COURSES = [
+  { id: "mulai", title: "Mulai dengan Fazz", blurb: "Pasang, kenali layar chat, dan selesaikan tugas pertamamu dalam 10 menit.", level: "Pemula",
+    lessons: [
+      { t: "Memasang Fazz Agent", b: `<p>Unduh APK dari halaman utama, lalu buka berkasnya. Android akan meminta izin memasang dari sumber ini; izinkan hanya untuk pengunduh yang kamu pakai.</p><p>Saat pertama dibuka, Fazz meminta izin notifikasi. Izin ini dipakai untuk memberi tahu saat tugas selesai atau saat Fazz butuh persetujuanmu.</p><div class="tip">Fazz tidak punya kunci AI di dalam aplikasi. Semua permintaan lewat server Fazz, jadi aman dari ekstraksi kunci.</div>` },
+      { t: "Mengenal layar chat", b: `<p>Di kiri atas ada tombol menu untuk riwayat chat, pencarian, <b>Fazz Academy</b>, dan pengaturan. Di kanan atas ada tombol chat baru.</p><p>Di bawah ada kotak pesan, tombol lampiran (kamera dan galeri), dan tombol mikrofon. Ketuk mikrofon untuk bicara, atau buka mode suara untuk percakapan tanpa mengetik.</p>` },
+      { t: "Tugas pertamamu", b: `<p>Coba ketik: <code>Apa jadwalku hari ini?</code> atau <code>Cari berita teknologi terbaru</code>. Fazz memakai alat yang sesuai (kalender, pencarian web) dan menampilkan langkahnya di bagian <i>Menjalankan langkah</i>. Ketuk untuk melihat detail.</p>` },
+    ] },
+  { id: "otonom", title: "Fazz bekerja di aplikasi lain", blurb: "Aktifkan kontrol layar agar Fazz bisa mengetuk, mengetik, dan menggulir untukmu.", level: "Menengah",
+    lessons: [
+      { t: "Mengaktifkan kontrol layar", b: `<p>Ketuk kartu <b>Aktifkan kontrol layar</b> di layar chat. Setelah membaca penjelasannya, Fazz membuka tombol <i>Fazz Agent</i> di pengaturan Aksesibilitas. Nyalakan, dan Fazz kembali sendiri ke chat.</p><div class="tip">Android tidak mengizinkan aplikasi menyalakan ini sendiri, jadi satu kali ketuk dari kamu tetap diperlukan. Di Android 13+, aplikasi dari luar Play Store mungkin butuh <i>Izinkan setelan terbatas</i> di Info aplikasi (menu ⋮).</div>` },
+      { t: "Contoh tugas", b: `<ul><li><code>Buka YouTube dan cari lagu Tulus</code></li><li><code>Kirim WhatsApp ke Budi: aku telat 10 menit</code></li><li><code>Atur alarm jam 5 pagi besok</code></li></ul><p>Fazz membaca layar, mengetuk, mengetik, lalu memeriksa hasilnya di setiap langkah.</p>` },
+      { t: "Persetujuan dan tombol STOP", b: `<p>Sebelum mengirim, membayar, memposting, menelepon, atau menghapus, Fazz selalu bertanya: lewat dialog di aplikasi, panel melayang, atau notifikasi dengan tombol <b>Izinkan</b>, <b>Tolak</b>, dan <b>STOP</b>. Tidak dijawab dalam 3 menit dianggap Tolak.</p><p>Tombol <b>STOP</b> muncul selama Fazz bekerja dan menghentikannya seketika.</p>` },
+    ] },
+  { id: "artefak", title: "Artefak: membuat halaman, dokumen, dan kode", blurb: "Minta Fazz membuat sesuatu yang bisa dibuka, disalin, dan dibagikan.", level: "Menengah",
+    lessons: [
+      { t: "Apa itu artefak?", b: `<p>Artefak adalah hasil kerja yang berdiri sendiri: halaman web, gambar SVG, dokumen, atau berkas kode. Di chat, artefak tampil sebagai kartu. Ketuk untuk membuka layar penuh.</p>` },
+      { t: "Meminta artefak", b: `<p>Contoh: <code>Buatkan kalkulator cicilan sebagai halaman web</code>, <code>Tulis proposal usaha kopi dalam dokumen</code>, atau <code>Buat skrip Python untuk merapikan nama berkas</code>.</p><p>Tab <b>Pratinjau</b> menjalankan halaman langsung; tab <b>Kode</b> menampilkan sumbernya. Gunakan ikon salin atau bagikan di atas.</p>` },
+      { t: "Meminta revisi", b: `<p>Lanjutkan di chat yang sama: <code>Ganti warna tombol jadi biru dan tambahkan kolom bunga</code>. Fazz membuat versi baru sebagai kartu baru, jadi versi lama tetap ada.</p>` },
+    ] },
+  { id: "aman", title: "Privasi dan keamanan", blurb: "Apa yang dikirim, apa yang tersimpan, dan bagaimana tetap memegang kendali.", level: "Semua",
+    lessons: [
+      { t: "Apa yang dikirim ke AI", b: `<p>Hanya pesan dan data yang perlu untuk tugasmu. Saat kontrol layar aktif, isi layar dikirim selama tugas berjalan. Fazz tidak mengetik password, PIN, atau OTP.</p>` },
+      { t: "Memori", b: `<p>Fazz hanya menyimpan sesuatu ke memori setelah kamu menyetujui kalimat persisnya. Lihat atau hapus kapan saja di Pengaturan → Memori.</p>` },
+      { t: "Mencabut akses", b: `<p>Matikan kontrol layar dan akses notifikasi kapan saja di pengaturan Android. Hapus chat dari menu riwayat; data tersimpan hanya di HP.</p>` },
+    ] },
+  { id: "prompt", title: "Meminta dengan efektif", blurb: "Cara menulis permintaan agar Fazz langsung paham dan hasilnya tepat.", level: "Pemula",
+    lessons: [
+      { t: "Sebut tujuan dan batasan", b: `<p>Bandingkan: <i>"Cari restoran"</i> dengan <i>"Cari restoran Padang dekat Blok M yang buka sampai jam 10 malam, urutkan dari yang termurah"</i>. Semakin jelas tujuan, semakin sedikit bolak-balik.</p>` },
+      { t: "Pecah tugas besar", b: `<p>Untuk tugas panjang, sebutkan urutannya: <code>Buka Maps, cari SPBU terdekat, lalu kirim lokasinya ke Ibu lewat WhatsApp</code>. Fazz akan meminta persetujuan sebelum langkah pengiriman.</p>` },
+      { t: "Pakai suara", b: `<p>Mode suara cocok saat tanganmu sibuk. Fazz membalas dengan suara, dan kamu bisa menyela kapan saja.</p>` },
+    ] },
+];
+
+const app = document.getElementById("app");
+const KEY = "fazz-academy-done";
+const done = () => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; } };
+const mark = (k) => { try { const d = done(); d[k] = 1; localStorage.setItem(KEY, JSON.stringify(d)); } catch {} };
+
+function home() {
+  document.title = "Fazz Academy";
+  app.innerHTML = `
+    <section class="hero"><h1>Belajar memakai Fazz Agent.</h1><p>Kursus singkat berbahasa Indonesia: dari chat pertama sampai tugas otomatis di aplikasi lain. Gratis, tanpa akun.</p></section>
+    <div class="grid">${COURSES.map(c => {
+      const n = c.lessons.length, d = c.lessons.filter((_, i) => done()[c.id + ":" + i]).length;
+      return `<a class="course" href="#/${c.id}/0"><span class="chip">${c.level}</span><h3>${c.title}</h3><p>${c.blurb}</p><div class="meta">${n} pelajaran${d ? " · " + d + " selesai" : ""}</div></a>`;
+    }).join("")}</div>`;
+}
+
+function lesson(cid, i) {
+  const c = COURSES.find(x => x.id === cid);
+  if (!c || !c.lessons[i]) return home();
+  const L = c.lessons[i], dn = done(), pct = Math.round(c.lessons.filter((_, k) => dn[cid + ":" + k]).length / c.lessons.length * 100);
+  document.title = L.t + " · Fazz Academy";
+  app.innerHTML = `<div class="layout">
+    <aside class="side"><div class="crumb"><a href="#/">← Semua kursus</a></div><h4>${c.title}</h4><div class="progress"><i style="width:${pct}%"></i></div>
+      ${c.lessons.map((l, k) => `<a class="lesson ${k === i ? "on" : ""} ${dn[cid + ":" + k] ? "done" : ""}" href="#/${cid}/${k}"><span class="tick"></span>${l.t}</a>`).join("")}</aside>
+    <article><div class="crumb">Pelajaran ${i + 1} dari ${c.lessons.length}</div><h2>${L.t}</h2>${L.b}
+      <div class="btns">${i > 0 ? `<a class="btn ghost" href="#/${cid}/${i - 1}">Sebelumnya</a>` : ""}<button class="primary" id="next">${i < c.lessons.length - 1 ? "Tandai selesai & lanjut" : "Tandai selesai"}</button></div></article></div>`;
+  document.getElementById("next").onclick = () => { mark(cid + ":" + i); location.hash = i < c.lessons.length - 1 ? `#/${cid}/${i + 1}` : "#/"; };
+  window.scrollTo(0, 0);
+}
+
+function route() { const [, cid, i] = location.hash.split("/"); cid ? lesson(cid, parseInt(i || "0", 10) || 0) : home(); }
+addEventListener("hashchange", route); route();
+</script>
+</body>
+</html>
