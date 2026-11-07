@@ -18,14 +18,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.fazz.agent.FazzApp
 import com.fazz.agent.domain.models.ChatMessage
 import com.fazz.agent.domain.models.MessageRole
-import com.fazz.agent.domain.models.TokenUsage
 import com.fazz.agent.domain.models.ToolActivity
 import com.fazz.agent.domain.models.ToolStatus
 import com.fazz.agent.presentation.chat.ChatScreen
 import com.fazz.agent.presentation.chat.ChatViewModel
 import com.fazz.agent.presentation.components.AssistantMessage
-import com.fazz.agent.presentation.components.InputBar
+import com.fazz.agent.presentation.components.Composer
 import com.fazz.agent.presentation.components.ListeningPanel
+import com.fazz.agent.presentation.components.StepsGroup
 import com.fazz.agent.presentation.components.UserBubble
 import com.fazz.agent.presentation.settings.MemoryScreen
 import com.fazz.agent.presentation.settings.SettingsScreen
@@ -61,13 +61,13 @@ class ScreenshotTest {
         compose.onRoot().captureRoboImage(out(name))
     }
 
-    @Test fun chatHome() = shot("01_chat_home") { ChatScreen(ChatViewModel(app.container, app)) {} }
+    @Test fun chatHome() = shot("01_chat_home") { ChatScreen(ChatViewModel(app.container, app), {}, {}) }
 
-    @Test fun chatHomeDark() = shot("02_chat_home_dark", dark = true) { ChatScreen(ChatViewModel(app.container, app)) {} }
+    @Test fun chatHomeDark() = shot("02_chat_home_dark", dark = true) { ChatScreen(ChatViewModel(app.container, app), {}, {}) }
 
-    @Test fun conversation() = shot("03_conversation") { SampleConversation() }
+    @Test fun conversation() = shot("03_conversation") { SampleConversation(expanded = false) }
 
-    @Test fun conversationDark() = shot("04_conversation_dark", dark = true) { SampleConversation() }
+    @Test fun conversationDark() = shot("04_conversation_dark", dark = true) { SampleConversation(expanded = false) }
 
     @Test fun settings() = shot("05_settings") { SettingsScreen(SettingsViewModel(app.container), {}, {}) }
 
@@ -75,40 +75,46 @@ class ScreenshotTest {
 
     @Test fun listening() = shot("07_listening") {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(16.dp), verticalArrangement = Arrangement.Bottom) {
-            ListeningPanel(level = 0.6f, partial = "Apa jadwalku besok pagi?", processing = false, onDone = {}, onCancel = {})
+            ListeningPanel(level = 0.6f, partial = "Kirim WhatsApp ke Budi bilang aku telat 10 menit", processing = false, onDone = {}, onCancel = {})
+        }
+    }
+
+    @Test fun agentSteps() = shot("08_agent_steps") {
+        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp)) {
+            StepsGroup(sampleSteps(running = false), running = false)
         }
     }
 }
 
+private fun sampleSteps(running: Boolean) = listOf(
+    ToolActivity("1", "search_contacts", "Mencari kontak", ToolStatus.SUCCESS, "1 kontak ditemukan"),
+    ToolActivity("2", "open_url", "Membuka tautan", ToolStatus.SUCCESS, "Tautan dibuka"),
+    ToolActivity("3", "read_screen", "Membaca layar", ToolStatus.SUCCESS, "WhatsApp: 42 elemen"),
+    ToolActivity("4", "tap", "Mengetuk", if (running) ToolStatus.RUNNING else ToolStatus.SUCCESS, if (running) null else "Mengetuk \"Kirim\""),
+)
+
 @Composable
-private fun SampleConversation() {
+private fun SampleConversation(expanded: Boolean) {
     val now = 0L
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(horizontal = 20.dp, vertical = 24.dp)) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(22.dp)) {
-            UserBubble(ChatMessage("1", MessageRole.USER, "Berapa persen baterai HP-ku? Lalu buka YouTube ya", now, viaVoice = true))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            UserBubble(ChatMessage("1", MessageRole.USER, "Kirim WhatsApp ke Budi: aku telat 10 menit ya", now, viaVoice = true))
             AssistantMessage(
-                ChatMessage(
-                    "2", MessageRole.ASSISTANT,
-                    "Baterai kamu **73%** dan sedang tidak dicas. YouTube sudah saya buka — selamat menonton!",
-                    now,
-                    tools = listOf(
-                        ToolActivity("a", "get_device_info", "Mengecek status HP", ToolStatus.SUCCESS, "Pixel 8, baterai 73%"),
-                        ToolActivity("b", "open_app", "Membuka aplikasi", ToolStatus.SUCCESS, "YouTube dibuka"),
-                    ),
-                    usage = TokenUsage(120, 40, 160),
-                ),
-                onRetry = {},
+                ChatMessage("2", MessageRole.ASSISTANT,
+                    "Sudah terkirim ke **Budi** lewat WhatsApp: \"Aku telat 10 menit ya\". Mau saya pasang pengingat juga?",
+                    now, tools = sampleSteps(running = false)),
+                isLast = false, onRetry = {}, onSpeak = {},
             )
-            UserBubble(ChatMessage("3", MessageRole.USER, "Cek jadwalku besok", now))
+            UserBubble(ChatMessage("3", MessageRole.USER, "Ya, ingatkan 10 menit lagi", now))
             AssistantMessage(
-                ChatMessage(
-                    "4", MessageRole.ASSISTANT, "", now, isStreaming = true,
-                    tools = listOf(ToolActivity("c", "read_calendar_events", "Mengecek kalender", ToolStatus.RUNNING)),
-                ),
-                onRetry = {},
+                ChatMessage("4", MessageRole.ASSISTANT, "", now, isStreaming = true,
+                    tools = listOf(ToolActivity("5", "set_reminder", "Memasang pengingat", ToolStatus.RUNNING))),
+                isLast = true, onRetry = {}, onSpeak = {},
             )
         }
         Spacer(Modifier.height(12.dp))
-        InputBar("", {}, busy = true, onSend = {}, onStop = {}, onMic = {}, modifier = Modifier.fillMaxWidth())
+        Composer("", emptyList(), false, busy = true, onTextChange = {}, onRemoveImage = {}, onPlus = {}, onMic = {}, onSend = {}, onStop = {}, onVoiceMode = {},
+            modifier = Modifier.fillMaxWidth())
+        if (expanded) Unit
     }
 }

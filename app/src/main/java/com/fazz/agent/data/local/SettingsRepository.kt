@@ -3,6 +3,7 @@ package com.fazz.agent.data.local
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.fazz.agent.domain.models.AppSettings
@@ -14,20 +15,24 @@ import java.util.UUID
 private val Context.dataStore by preferencesDataStore(name = "fazz_settings")
 
 /** Non-sensitive app settings. No passwords or tokens are stored here (none exist in the app). */
-class SettingsRepository(private val context: Context, private val defaultModel: String) {
+class SettingsRepository(private val context: Context) {
     private object Keys {
-        val model = stringPreferencesKey("model_id")
         val speak = booleanPreferencesKey("speak_replies")
         val autoSend = booleanPreferencesKey("auto_send_voice")
         val installId = stringPreferencesKey("install_id")
+        val briefingOn = booleanPreferencesKey("briefing_enabled")
+        val briefingHour = intPreferencesKey("briefing_hour")
+        val screenDisclosure = booleanPreferencesKey("screen_disclosure_accepted")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
         AppSettings(
-            modelId = p[Keys.model]?.takeIf { it.isNotBlank() } ?: defaultModel,
             speakReplies = p[Keys.speak] ?: false,
             autoSendVoice = p[Keys.autoSend] ?: true,
             installId = p[Keys.installId].orEmpty(),
+            briefingEnabled = p[Keys.briefingOn] ?: false,
+            briefingHour = p[Keys.briefingHour] ?: 7,
+            screenDisclosureAccepted = p[Keys.screenDisclosure] ?: false,
         )
     }
 
@@ -41,7 +46,8 @@ class SettingsRepository(private val context: Context, private val defaultModel:
         return id
     }
 
-    suspend fun setModel(model: String) = context.dataStore.edit { it[Keys.model] = model.trim() }
     suspend fun setSpeakReplies(v: Boolean) = context.dataStore.edit { it[Keys.speak] = v }
     suspend fun setAutoSendVoice(v: Boolean) = context.dataStore.edit { it[Keys.autoSend] = v }
+    suspend fun setBriefing(enabled: Boolean, hour: Int) = context.dataStore.edit { it[Keys.briefingOn] = enabled; it[Keys.briefingHour] = hour }
+    suspend fun acceptScreenDisclosure() = context.dataStore.edit { it[Keys.screenDisclosure] = true }
 }

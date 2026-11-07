@@ -3,8 +3,8 @@ package com.fazz.agent.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fazz.agent.AppContainer
-import com.fazz.agent.BuildConfig
 import com.fazz.agent.core.ai.AiException
+import com.fazz.agent.core.screen.FazzAccessibilityService
 import com.fazz.agent.core.security.SensitiveDataDetector
 import com.fazz.agent.domain.models.AppSettings
 import com.fazz.agent.domain.models.MemoryCategory
@@ -19,31 +19,39 @@ import kotlinx.coroutines.launch
 sealed interface ConnectionCheck {
     data object Idle : ConnectionCheck
     data object Running : ConnectionCheck
-    data class Ok(val defaultModel: String, val models: List<String>) : ConnectionCheck
+    data object Ok : ConnectionCheck
     data class Failed(val message: String) : ConnectionCheck
 }
 
 class SettingsViewModel(private val c: AppContainer) : ViewModel() {
     val settings: StateFlow<AppSettings?> = c.settings.settings.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val memories: StateFlow<List<MemoryItem>> = c.memory.items
+    val screenControlOn: StateFlow<Boolean> = FazzAccessibilityService.connected
 
     private val _check = MutableStateFlow<ConnectionCheck>(ConnectionCheck.Idle)
     val check: StateFlow<ConnectionCheck> = _check.asStateFlow()
 
-    val backendUrl: String = BuildConfig.SUPABASE_URL.ifBlank { "(belum dikonfigurasi)" }
-
     init { viewModelScope.launch { c.memory.load(); c.settings.installId() } }
 
-    fun setModel(id: String) = viewModelScope.launch { c.settings.setModel(id) }
+    fun notificationAccessOn(): Boolean = c.notifications.listenerEnabled()
+
     fun setSpeak(v: Boolean) = viewModelScope.launch { c.settings.setSpeakReplies(v) }
     fun setAutoSend(v: Boolean) = viewModelScope.launch { c.settings.setAutoSendVoice(v) }
+    fun acceptScreenDisclosure() = viewModelScope.launch { c.settings.acceptScreenDisclosure() }
+
+    fun setBriefing(enabled: Boolean, hour: Int) = viewModelScope.launch {
+        c.settings.setBriefing(enabled, hour)
+        if (enabled) c.briefing.schedule(hour) else c.briefing.cancel()
+    }
+
+    fun runBriefingNow() = c.briefing.runNow()
 
     fun checkConnection() {
         _check.value = ConnectionCheck.Running
         viewModelScope.launch {
             _check.value = try {
-                val list = c.aiService.listModels()
-                ConnectionCheck.Ok(list.defaultModel, list.models.filter { it.contains("flash") || it.contains("pro") }.ifEmpty { list.models })
+                c.aiService.listModels()
+                ConnectionCheck.Ok
             } catch (e: AiException) {
                 ConnectionCheck.Failed(e.error.userMessage)
             }

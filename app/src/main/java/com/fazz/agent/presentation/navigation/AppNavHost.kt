@@ -41,7 +41,9 @@ fun AppNavHost() {
         popEnterTransition = { fadeIn() },
         popExitTransition = { slideOutHorizontally { it / 4 } + fadeOut() },
     ) {
-        composable(Routes.CHAT) { ChatScreen(chatVm, onOpenSettings = { nav.navigate(Routes.SETTINGS) }) }
+        composable(Routes.CHAT) {
+            ChatScreen(chatVm, onOpenSettings = { nav.navigate(Routes.SETTINGS) }, onOpenMemory = { nav.navigate(Routes.MEMORY) })
+        }
         composable(Routes.SETTINGS) {
             SettingsScreen(settingsVm, onBack = { nav.popBackStack() }, onOpenMemory = { nav.navigate(Routes.MEMORY) })
         }

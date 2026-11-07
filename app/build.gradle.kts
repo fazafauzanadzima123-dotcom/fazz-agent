@@ -22,12 +22,11 @@ android {
         applicationId = "com.fazz.agent"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.2.0"
+        versionCode = 4
+        versionName = "0.3.0"
 
         buildConfigField("String", "SUPABASE_URL", "\"${secret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secret("SUPABASE_ANON_KEY")}\"")
-        buildConfigField("String", "DEFAULT_MODEL", "\"gemini-3.5-flash-lite\"")
     }
 
     buildTypes {
@@ -65,6 +64,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

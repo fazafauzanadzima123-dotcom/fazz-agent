@@ -43,6 +43,8 @@ data class ToolResult(
     /** Short, human-readable summary for the UI. */
     val summary: String,
     val errorCode: String? = null,
+    /** Optional image (JPEG) sent to the model alongside the result, e.g. a screenshot. */
+    val imageJpeg: ByteArray? = null,
 ) {
     /** What the model receives as functionResponse.response. */
     fun toModelResponse(): JsonObject = if (success) {

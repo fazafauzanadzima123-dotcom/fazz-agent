@@ -38,9 +38,9 @@ class ContactsTool(private val context: Context) : AgentTool {
     override fun confirmation(args: JsonObject): ConfirmationRequest {
         val phone = args.bool("include_phone") == true
         return ConfirmationRequest(
-            title = "Bagikan info kontak ke Gemini?",
+            title = "Bagikan info kontak ke AI Fazz?",
             message = "Fazz akan mencari \"${args.string("name_query")}\" di kontakmu dan mengirim maksimal 5 nama yang cocok" +
-                (if (phone) " beserta nomor teleponnya" else "") + " ke Gemini.",
+                (if (phone) " beserta nomor teleponnya" else "") + " ke penyedia AI Fazz.",
         )
     }
 

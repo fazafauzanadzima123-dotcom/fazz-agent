@@ -23,6 +23,30 @@ object HistoryTrimmer {
         return boundaries.lastOrNull()?.let { contents.subList(it, contents.size) } ?: contents.takeLast(1)
     }
 
+    /**
+     * Keeps only the newest [keep] inline images (screenshots/photos); older ones are replaced by a short
+     * text note so requests stay small. Part counts are preserved so turns never become empty.
+     */
+    fun keepLatestImages(contents: List<JsonObject>, keep: Int): List<JsonObject> {
+        var remaining = keep
+        val out = ArrayList<JsonObject>(contents.size)
+        for (c in contents.asReversed()) {
+            val parts = c["parts"] as? JsonArray
+            if (parts == null || parts.none { (it as? JsonObject)?.containsKey("inlineData") == true }) { out += c; continue }
+            val newParts = parts.asReversed().map { p ->
+                val o = p as? JsonObject
+                if (o != null && o.containsKey("inlineData")) {
+                    if (remaining > 0) { remaining--; o } else JsonObject(mapOf("text" to JsonPrimitive("[gambar sebelumnya dihapus]")))
+                } else p
+            }.asReversed()
+            out += JsonObject(c + ("parts" to JsonArray(newParts)))
+        }
+        return out.asReversed()
+    }
+
+    /** Removes all images (used before saving a conversation to disk). */
+    fun stripImages(contents: List<JsonObject>): List<JsonObject> = keepLatestImages(contents, 0)
+
     private fun isUserText(c: JsonObject): Boolean {
         if ((c["role"] as? JsonPrimitive)?.content != "user") return false
         val parts = c["parts"] as? JsonArray ?: return false

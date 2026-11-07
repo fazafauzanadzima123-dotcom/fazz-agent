@@ -48,9 +48,17 @@ class AgentOrchestrator(
         userText: String,
         systemInstruction: String,
         model: String,
+    ): Flow<AgentEvent> = run(history, listOf(jsonOf("text" to userText)), systemInstruction, model)
+
+    /** [userParts] may mix text and inlineData (images) parts. */
+    fun run(
+        history: List<JsonObject>,
+        userParts: List<JsonObject>,
+        systemInstruction: String,
+        model: String,
     ): Flow<AgentEvent> = flow {
         val contents = history.toMutableList()
-        contents += userContent(userText)
+        contents += JsonObject(mapOf("role" to JsonPrimitive("user"), "parts" to JsonArray(userParts)))
         val usageTotal = intArrayOf(0, 0, 0)
         val finalText = StringBuilder()
 
@@ -61,7 +69,7 @@ class AgentOrchestrator(
                 var stepUsage: AiStreamEvent.Usage? = null
                 var finishReason: String? = null
 
-                val request = ChatRequest(model, systemInstruction, HistoryTrimmer.trim(contents.toList()).toList(), registry.declarations())
+                val request = ChatRequest(model, systemInstruction, HistoryTrimmer.keepLatestImages(HistoryTrimmer.trim(contents.toList()), 1), registry.declarations())
                 ai.streamChat(request).collect { ev ->
                     when (ev) {
                         is AiStreamEvent.TextDelta -> {
@@ -96,6 +104,7 @@ class AgentOrchestrator(
                 if (finalText.isNotEmpty()) { finalText.append("\n\n"); emit(AgentEvent.TextDelta("\n\n")) }
 
                 val responseParts = mutableListOf<JsonObject>()
+                val images = mutableListOf<ByteArray>()
                 for (call in calls) {
                     val callId = call.id ?: UUID.randomUUID().toString()
                     val label = registry.get(call.name)?.activityLabel ?: "Using ${call.name}"
@@ -103,7 +112,11 @@ class AgentOrchestrator(
                     val result = executor.execute(call.name, call.args)
                     emit(AgentEvent.ToolFinished(callId, call.name, result))
                     responseParts += functionResponsePart(call, result)
+                    result.imageJpeg?.let { images += it }
                 }
+                // Screenshots travel as image parts right after the function responses they belong to.
+                images.forEach { responseParts += imagePart(it) }
+                images.clear()
                 contents += JsonObject(mapOf("role" to JsonPrimitive("user"), "parts" to JsonArray(responseParts)))
             }
             // Step budget exhausted: stop safely instead of looping forever.
@@ -123,6 +136,10 @@ class AgentOrchestrator(
     companion object {
         fun userContent(text: String): JsonObject = JsonObject(
             mapOf("role" to JsonPrimitive("user"), "parts" to JsonArray(listOf(jsonOf("text" to text)))),
+        )
+
+        fun imagePart(jpeg: ByteArray, mime: String = "image/jpeg"): JsonObject = JsonObject(
+            mapOf("inlineData" to jsonOf("mimeType" to mime, "data" to java.util.Base64.getEncoder().encodeToString(jpeg))),
         )
 
         fun functionResponsePart(call: AiStreamEvent.FunctionCall, result: ToolResult): JsonObject {

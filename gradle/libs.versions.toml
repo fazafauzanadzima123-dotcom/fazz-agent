@@ -12,6 +12,7 @@ serialization = "1.12.0"
 coroutines = "1.11.0"
 iconsExtended = "1.7.8"
 junit = "4.13.2"
+work = "2.12.0"
 robolectric = "4.17"
 roborazzi = "1.77.0"
 androidxJunit = "1.3.0"
@@ -35,6 +36,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-work = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
 roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }

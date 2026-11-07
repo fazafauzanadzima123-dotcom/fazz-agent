@@ -33,6 +33,8 @@ data class ChatMessage(
     val error: String? = null,
     val usage: TokenUsage? = null,
     val viaVoice: Boolean = false,
+    /** Paths of attached images (app-private files). */
+    val images: List<String> = emptyList(),
 )
 
 @Serializable
@@ -48,10 +50,12 @@ data class MemoryItem(
 )
 
 data class AppSettings(
-    val modelId: String,
     val speakReplies: Boolean,
     val autoSendVoice: Boolean,
     val installId: String,
+    val briefingEnabled: Boolean,
+    val briefingHour: Int,
+    val screenDisclosureAccepted: Boolean,
 )
 
 /** High-level agent state for the activity indicator. */

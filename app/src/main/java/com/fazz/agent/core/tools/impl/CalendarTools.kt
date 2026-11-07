@@ -41,8 +41,8 @@ class ReadCalendarTool(private val context: Context) : AgentTool {
     override fun confirmation(args: JsonObject): ConfirmationRequest {
         val days = (args.long("days_ahead") ?: 1L)
         return ConfirmationRequest(
-            title = "Bagikan kalender ke Gemini?",
-            message = "Fazz akan membaca acara $days hari ke depan dan mengirim judul, waktu, dan lokasinya ke Gemini untuk menjawabmu.",
+            title = "Bagikan kalender ke AI Fazz?",
+            message = "Fazz akan membaca acara $days hari ke depan dan mengirim judul, waktu, dan lokasinya ke penyedia AI Fazz untuk menjawabmu.",
         )
     }
 
