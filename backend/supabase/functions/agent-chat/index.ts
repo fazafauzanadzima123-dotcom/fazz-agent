@@ -19,7 +19,7 @@ import { addDummySignatures, openAIStreamToNeutral, toOpenAIMessages, toOpenAITo
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
 const OPENAI_BASE = "https://api.openai.com/v1";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.5-flash-lite";
-const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-5-mini";
+const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-5.4-mini";
 const DAILY_LIMIT = Number(Deno.env.get("DAILY_REQUEST_LIMIT") ?? "600");
 
 const MAX_BODY_BYTES = 3_000_000; // room for one compressed screenshot or photo
@@ -178,7 +178,9 @@ async function handleChat(body: any): Promise<Response> {
       if (r.ok) return r;
       if (!geminiKey || !RETRYABLE.has(r.status)) return await upstreamError("primary", r);
       lastFailure = r;
-      console.warn("primary failed, falling back", r.status);
+      let why = "";
+      try { const b = await r.clone().json(); why = `${b?.error?.code ?? ""} ${b?.error?.type ?? ""} ${String(b?.error?.message ?? "").slice(0, 160)}`; } catch (_) { /* ignore */ }
+      console.warn("primary failed, falling back", r.status, why);
     } catch (e) {
       console.warn("primary threw, falling back", String(e));
       if (!geminiKey) throw e;
