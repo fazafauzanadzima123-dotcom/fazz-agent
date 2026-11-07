@@ -35,6 +35,10 @@ class SettingsRepository(private val context: Context) {
         val emoji = stringPreferencesKey("emoji")
         val location = booleanPreferencesKey("location_allowed")
         val disabledPlugins = stringSetPreferencesKey("disabled_plugins")
+        val gName = stringPreferencesKey("google_name")
+        val gEmail = stringPreferencesKey("google_email")
+        val gPhoto = stringPreferencesKey("google_photo")
+        val gServices = stringSetPreferencesKey("google_services")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -55,6 +59,10 @@ class SettingsRepository(private val context: Context) {
             emoji = p[Keys.emoji] ?: "sedikit",
             locationAllowed = p[Keys.location] ?: false,
             disabledPlugins = p[Keys.disabledPlugins] ?: emptySet(),
+            googleName = p[Keys.gName].orEmpty(),
+            googleEmail = p[Keys.gEmail].orEmpty(),
+            googlePhoto = p[Keys.gPhoto].orEmpty(),
+            googleServices = p[Keys.gServices] ?: emptySet(),
         )
     }
 
@@ -83,6 +91,16 @@ class SettingsRepository(private val context: Context) {
     suspend fun setPluginEnabled(id: String, enabled: Boolean) = context.dataStore.edit {
         val cur = it[Keys.disabledPlugins] ?: emptySet()
         it[Keys.disabledPlugins] = if (enabled) cur - id else cur + id
+    }
+    suspend fun setGoogleAccount(name: String, email: String, photo: String) = context.dataStore.edit {
+        it[Keys.gName] = name; it[Keys.gEmail] = email; it[Keys.gPhoto] = photo
+    }
+    suspend fun setGoogleService(id: String, on: Boolean) = context.dataStore.edit {
+        val cur = it[Keys.gServices] ?: emptySet()
+        it[Keys.gServices] = if (on) cur + id else cur - id
+    }
+    suspend fun clearGoogle() = context.dataStore.edit {
+        it.remove(Keys.gName); it.remove(Keys.gEmail); it.remove(Keys.gPhoto); it.remove(Keys.gServices)
     }
     suspend fun markSetupSeen() = context.dataStore.edit { it[Keys.setupSeen] = true }
     suspend fun setResponseStyle(id: String) = context.dataStore.edit { it[Keys.style] = id }

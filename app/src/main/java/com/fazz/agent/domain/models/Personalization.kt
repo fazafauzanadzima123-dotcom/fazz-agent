@@ -57,10 +57,18 @@ enum class PluginGroup(val id: String, val label: String, val description: Strin
     MEDIA("media", "Media", "Putar, jeda, dan lanjut lagu atau video.", setOf("media_control")),
     NOTIFICATIONS("notifikasi", "Notifikasi", "Merangkum notifikasi yang masuk.", setOf("read_notifications")),
     ARTIFACTS("artefak", "Artefak", "Membuat halaman, dokumen, dan kode yang bisa dibuka.", setOf("create_artifact")),
+    GOOGLE("google", "Akun Google", "Kalender Google, Gmail, dan Google Docs (setelah akun dihubungkan).", GoogleToolMap.values.flatten().toSet()),
     MEMORY("memori", "Memori", "Menyimpan hal penting tentangmu setelah kamu setujui.", setOf("save_memory")),
     ;
     companion object { fun from(id: String) = entries.firstOrNull { it.id == id } }
 }
+
+/** Tools per Google service id (see GoogleService). */
+val GoogleToolMap: Map<String, Set<String>> = mapOf(
+    "kalender" to setOf("google_calendar_events", "google_calendar_create_event"),
+    "gmail" to setOf("gmail_search", "gmail_read", "gmail_create_draft", "gmail_send"),
+    "drive" to setOf("drive_save_document"),
+)
 
 /** Tool name of the location ability; it is controlled by the Lokasi switch rather than a plugin toggle. */
 const val LOCATION_TOOL = "get_location"

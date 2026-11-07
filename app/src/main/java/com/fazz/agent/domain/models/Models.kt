@@ -80,6 +80,10 @@ data class AppSettings(
     val emoji: String = EmojiLevel.LIGHT.id,
     val locationAllowed: Boolean = false,
     val disabledPlugins: Set<String> = emptySet(),
+    val googleName: String = "",
+    val googleEmail: String = "",
+    val googlePhoto: String = "",
+    val googleServices: Set<String> = emptySet(),
 ) {
     val profile: Profile
         get() = Profile(nickname, about, instructions, ResponseStyle.from(responseStyle), Tone.from(tone), AnswerLength.from(answerLength), EmojiLevel.from(emoji))
@@ -89,6 +93,9 @@ data class AppSettings(
         get() = buildSet {
             disabledPlugins.mapNotNull(PluginGroup::from).forEach { addAll(it.tools) }
             if (!locationAllowed) add(LOCATION_TOOL)
+            // Google tools only exist for services the signed-in user has connected (and not switched off).
+            val googleOn = googleEmail.isNotBlank() && PluginGroup.GOOGLE.id !in disabledPlugins
+            GoogleToolMap.forEach { (service, tools) -> if (!googleOn || service !in googleServices) addAll(tools) }
         }
 }
 

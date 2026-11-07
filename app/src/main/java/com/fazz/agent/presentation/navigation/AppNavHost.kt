@@ -19,6 +19,7 @@ import com.fazz.agent.FazzApp
 import com.fazz.agent.presentation.chat.ChatScreen
 import com.fazz.agent.presentation.chat.ChatViewModel
 import com.fazz.agent.presentation.customize.CustomizeScreen
+import com.fazz.agent.presentation.customize.GoogleAccountScreen
 import com.fazz.agent.presentation.customize.LocationScreen
 import com.fazz.agent.presentation.customize.PasswordScreen
 import com.fazz.agent.presentation.customize.PersonalityScreen
@@ -38,6 +39,7 @@ object Routes {
     const val PLUGINS = "plugins"
     const val LOCATION = "location"
     const val PASSWORD = "password"
+    const val GOOGLE = "google"
 }
 
 @Composable
@@ -71,12 +73,13 @@ fun AppNavHost() {
             CustomizeScreen(
                 settingsVm, onBack = { nav.popBackStack() },
                 onPersonality = { nav.navigate(Routes.PERSONALITY) }, onMemory = { nav.navigate(Routes.MEMORY) },
-                onPlugins = { nav.navigate(Routes.PLUGINS) }, onLocation = { nav.navigate(Routes.LOCATION) }, onPassword = { nav.navigate(Routes.PASSWORD) },
+                onPlugins = { nav.navigate(Routes.PLUGINS) }, onLocation = { nav.navigate(Routes.LOCATION) }, onPassword = { nav.navigate(Routes.PASSWORD) }, onGoogle = { nav.navigate(Routes.GOOGLE) },
             )
         }
         composable(Routes.PERSONALITY) { PersonalityScreen(settingsVm, onBack = { nav.popBackStack() }) }
         composable(Routes.PLUGINS) { PluginsScreen(settingsVm, onBack = { nav.popBackStack() }) }
         composable(Routes.LOCATION) { LocationScreen(settingsVm, onBack = { nav.popBackStack() }) }
+        composable(Routes.GOOGLE) { GoogleAccountScreen(settingsVm, onBack = { nav.popBackStack() }) }
         composable(Routes.PASSWORD) { PasswordScreen(onBack = { nav.popBackStack() }) }
         composable(Routes.SETUP) {
             SetupScreen(

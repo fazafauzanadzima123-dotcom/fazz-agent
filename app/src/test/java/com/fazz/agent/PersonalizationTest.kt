@@ -52,4 +52,16 @@ class PersonalizationTest {
         assertTrue(prompt(Profile(), listOf("Kalender")).contains("switched these abilities off"))
         assertFalse(prompt(Profile()).contains("switched these abilities off"))
     }
+
+    @Test fun googleToolsAreHiddenUntilConnected() {
+        val signedOut = settings().disabledTools
+        assertTrue("gmail_send" in signedOut && "google_calendar_events" in signedOut && "drive_save_document" in signedOut)
+
+        val calendarOnly = settings().copy(googleEmail = "a@b.c", googleServices = setOf("kalender")).disabledTools
+        assertFalse("google_calendar_events" in calendarOnly)
+        assertTrue("gmail_send" in calendarOnly)
+
+        val switchedOff = settings().copy(googleEmail = "a@b.c", googleServices = setOf("gmail"), disabledPlugins = setOf("google")).disabledTools
+        assertTrue("gmail_search" in switchedOff)
+    }
 }

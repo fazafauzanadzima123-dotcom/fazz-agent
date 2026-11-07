@@ -38,7 +38,15 @@ import com.fazz.agent.core.tools.impl.NavigateTool
 import com.fazz.agent.core.tools.impl.OpenAppTool
 import com.fazz.agent.core.tools.impl.OpenUrlTool
 import com.fazz.agent.core.tools.impl.CreateArtifactTool
+import com.fazz.agent.core.tools.impl.DriveSaveDocTool
 import com.fazz.agent.core.tools.impl.GetLocationTool
+import com.fazz.agent.core.tools.impl.GmailDraftTool
+import com.fazz.agent.core.tools.impl.GmailReadTool
+import com.fazz.agent.core.tools.impl.GmailSearchTool
+import com.fazz.agent.core.tools.impl.GmailSendTool
+import com.fazz.agent.core.tools.impl.GoogleCalendarCreateTool
+import com.fazz.agent.core.tools.impl.GoogleCalendarListTool
+import com.fazz.agent.core.tools.impl.GoogleTokens
 import com.fazz.agent.core.tools.impl.ReadCalendarTool
 import com.fazz.agent.core.tools.impl.ReadNotificationsTool
 import com.fazz.agent.core.tools.impl.RememberTool
@@ -85,6 +93,12 @@ class AppContainer(context: Context) {
     )
 
     val interaction = InteractionBroker()
+
+    val googleAccess = com.fazz.agent.core.google.GoogleAccess(app)
+    private val googleTokens = GoogleTokens { service ->
+        val s = settings.current()
+        if (s.googleEmail.isBlank() || service.id !in s.googleServices) null else googleAccess.silentToken(service, s.googleEmail)
+    }
     private val permissions = AndroidPermissionChecker(app)
     private val screen = ScreenControllerProvider { FazzAccessibilityService.instance }
     private val webSearch = WebSearchProvider { query -> aiService.webSearch(query, null) }
@@ -102,6 +116,9 @@ class AppContainer(context: Context) {
         SwipeTool(screen), LookAtScreenTool(screen), WaitTool(),
         // Memory & approval
         RememberTool(memory), AskConfirmationTool(gateway), CreateArtifactTool(), GetLocationTool(app),
+        // Google account (Calendar, Gmail, Drive/Docs)
+        GoogleCalendarListTool(googleTokens), GoogleCalendarCreateTool(googleTokens), GmailSearchTool(googleTokens), GmailReadTool(googleTokens),
+        GmailDraftTool(googleTokens), GmailSendTool(googleTokens), DriveSaveDocTool(googleTokens),
     )
 
     val toolRegistry = ToolRegistry(allTools(interaction))

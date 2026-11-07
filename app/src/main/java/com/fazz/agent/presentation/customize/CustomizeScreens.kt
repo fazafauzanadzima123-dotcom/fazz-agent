@@ -34,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Extension
@@ -165,6 +166,7 @@ fun CustomizeScreen(
     onPlugins: () -> Unit,
     onLocation: () -> Unit,
     onPassword: () -> Unit,
+    onGoogle: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val settings by vm.settings.collectAsStateWithLifecycle()
@@ -187,6 +189,8 @@ fun CustomizeScreen(
             NavRow(Icons.Rounded.Extension, "Plugin", "${PluginGroup.entries.size - off} aktif", onClick = onPlugins)
         }
         Group {
+            NavRow(Icons.Rounded.AccountCircle, "Akun Google", s?.googleEmail?.takeIf { it.isNotBlank() } ?: "Masuk", highlight = s?.googleEmail.isNullOrBlank(), onClick = onGoogle)
+            Divider()
             NavRow(Icons.Rounded.CalendarMonth, "Kalender", if (calendarOn) "Terhubung" else "Siapkan", highlight = !calendarOn) {
                 if (calendarOn) context.startActivity(appInfo(context)) else calendarLauncher.launch(Manifest.permission.READ_CALENDAR)
             }

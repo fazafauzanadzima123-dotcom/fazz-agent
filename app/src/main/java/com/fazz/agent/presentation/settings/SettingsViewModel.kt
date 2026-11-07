@@ -43,6 +43,10 @@ class SettingsViewModel(private val c: AppContainer) : ViewModel() {
     fun setEmoji(id: String) = viewModelScope.launch { c.settings.setEmoji(id) }
     fun setLocationAllowed(v: Boolean) = viewModelScope.launch { c.settings.setLocationAllowed(v) }
     fun setPluginEnabled(id: String, enabled: Boolean) = viewModelScope.launch { c.settings.setPluginEnabled(id, enabled) }
+    val google get() = c.googleAccess
+    fun saveGoogleAccount(p: com.fazz.agent.core.google.GoogleProfile) = viewModelScope.launch { c.settings.setGoogleAccount(p.name, p.email, p.photoUrl) }
+    fun setGoogleService(id: String, on: Boolean) = viewModelScope.launch { c.settings.setGoogleService(id, on) }
+    fun signOutGoogle() = viewModelScope.launch { c.settings.clearGoogle() }
     fun markSetupSeen() = viewModelScope.launch { c.settings.markSetupSeen() }
     fun setStyle(id: String) = viewModelScope.launch { c.settings.setResponseStyle(id) }
     fun acceptScreenDisclosure() = viewModelScope.launch { c.settings.acceptScreenDisclosure() }
