@@ -16,7 +16,7 @@
 
 ## Bahasa Indonesia
 
-### Fitur (v0.3.0)
+### Fitur (v0.3.1)
 
 | Kamu bilang | Yang Fazz lakukan | Izin |
 |---|---|---|
@@ -34,7 +34,7 @@
 
 Lainnya: jawaban streaming, input suara (SpeechRecognizer) dengan indikator mikrofon, jawaban dibacakan (TextToSpeech), riwayat chat, memori yang bisa dilihat/dihapus, tampilan krem minimalis dengan mode gelap otomatis, seluruh UI berbahasa Indonesia.
 
-Baru di v0.3.0: kontrol layar dengan persetujuan sebelum tindakan tak bisa dibatalkan (lewat dialog, panel melayang, atau notifikasi), penyiapan izin sejak pertama dibuka, riwayat banyak chat, gaya jawaban, artefak, mode suara, dan [Fazz Academy](https://fazz-agent.vercel.app/academy/). Model AI utama Gemini dengan cadangan otomatis; kunci hanya ada di server.
+Baru di v0.3.x: menu Sesuaikan (Kepribadian, Memori, Plugin, Lokasi, Akun Google dengan Kalender, Gmail, Docs), kontrol layar dengan persetujuan sebelum tindakan tak bisa dibatalkan (lewat dialog, panel melayang, atau notifikasi), penyiapan izin sejak pertama dibuka, riwayat banyak chat, gaya jawaban, artefak, mode suara, dan [Fazz Academy](https://fazz-agent.vercel.app/academy/). Model AI utama Gemini dengan cadangan otomatis; kunci hanya ada di server.
 
 **Belum ada:** panggilan suara "Hai Fazz", mendengarkan di latar belakang, Projects.
 
