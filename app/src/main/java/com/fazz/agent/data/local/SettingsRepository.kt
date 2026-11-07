@@ -24,6 +24,7 @@ class SettingsRepository(private val context: Context) {
         val briefingHour = intPreferencesKey("briefing_hour")
         val screenDisclosure = booleanPreferencesKey("screen_disclosure_accepted")
         val style = stringPreferencesKey("response_style")
+        val setupSeen = booleanPreferencesKey("setup_seen")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -35,6 +36,7 @@ class SettingsRepository(private val context: Context) {
             briefingHour = p[Keys.briefingHour] ?: 7,
             screenDisclosureAccepted = p[Keys.screenDisclosure] ?: false,
             responseStyle = p[Keys.style] ?: "normal",
+            setupSeen = p[Keys.setupSeen] ?: false,
         )
     }
 
@@ -51,6 +53,7 @@ class SettingsRepository(private val context: Context) {
     suspend fun setSpeakReplies(v: Boolean) = context.dataStore.edit { it[Keys.speak] = v }
     suspend fun setAutoSendVoice(v: Boolean) = context.dataStore.edit { it[Keys.autoSend] = v }
     suspend fun setBriefing(enabled: Boolean, hour: Int) = context.dataStore.edit { it[Keys.briefingOn] = enabled; it[Keys.briefingHour] = hour }
+    suspend fun markSetupSeen() = context.dataStore.edit { it[Keys.setupSeen] = true }
     suspend fun setResponseStyle(id: String) = context.dataStore.edit { it[Keys.style] = id }
     suspend fun acceptScreenDisclosure() = context.dataStore.edit { it[Keys.screenDisclosure] = true }
 }

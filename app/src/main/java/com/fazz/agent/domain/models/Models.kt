@@ -71,6 +71,7 @@ data class AppSettings(
     val briefingHour: Int,
     val screenDisclosureAccepted: Boolean,
     val responseStyle: String = ResponseStyle.NORMAL.id,
+    val setupSeen: Boolean = false,
 )
 
 /** How Fazz words its answers (like Claude's response styles). */

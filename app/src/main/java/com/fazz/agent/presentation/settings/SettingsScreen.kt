@@ -69,7 +69,7 @@ import com.fazz.agent.presentation.theme.MonoStyle
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onOpenMemory: () -> Unit) {
+fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onOpenMemory: () -> Unit, onOpenSetup: () -> Unit = {}) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val check by vm.check.collectAsStateWithLifecycle()
     val memories by vm.memories.collectAsStateWithLifecycle()
@@ -99,6 +99,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onOpenMemory: () -
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Section("Kontrol layar") {
+                OutlinedButton(onClick = onOpenSetup) { Text("Buka panduan penyiapan izin") }
                 StatusRow(screenOn, if (screenOn) "Aktif. Fazz bisa mengoperasikan aplikasi lain saat kamu memintanya." else "Belum aktif. Tanpa ini Fazz hanya bisa membuka aplikasi, bukan mengetuk atau mengetik di dalamnya.")
                 if (!screenOn) {
                     Button(onClick = { if (settings?.screenDisclosureAccepted == true) com.fazz.agent.core.screen.ScreenSetup.open(context) else showDisclosure = true }) { Text("Aktifkan kontrol layar") }

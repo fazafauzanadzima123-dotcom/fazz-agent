@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -17,6 +19,7 @@ import com.fazz.agent.FazzApp
 import com.fazz.agent.presentation.chat.ChatScreen
 import com.fazz.agent.presentation.chat.ChatViewModel
 import com.fazz.agent.presentation.settings.MemoryScreen
+import com.fazz.agent.presentation.setup.SetupScreen
 import com.fazz.agent.presentation.settings.SettingsScreen
 import com.fazz.agent.presentation.settings.SettingsViewModel
 
@@ -24,6 +27,7 @@ object Routes {
     const val CHAT = "chat"
     const val SETTINGS = "settings"
     const val MEMORY = "memory"
+    const val SETUP = "setup"
 }
 
 @Composable
@@ -32,6 +36,12 @@ fun AppNavHost() {
     val nav = rememberNavController()
     val chatVm: ChatViewModel = viewModel(factory = viewModelFactory { initializer { ChatViewModel(app.container, app as Application) } })
     val settingsVm: SettingsViewModel = viewModel(factory = viewModelFactory { initializer { SettingsViewModel(app.container) } })
+
+    // First launch: open the setup screen once so Fazz can be allowed to act on its own from the start.
+    val appSettings by settingsVm.settings.collectAsStateWithLifecycle()
+    androidx.compose.runtime.LaunchedEffect(appSettings?.setupSeen) {
+        if (appSettings?.setupSeen == false) nav.navigate(Routes.SETUP)
+    }
 
     NavHost(
         navController = nav,
@@ -45,7 +55,14 @@ fun AppNavHost() {
             ChatScreen(chatVm, onOpenSettings = { nav.navigate(Routes.SETTINGS) }, onOpenMemory = { nav.navigate(Routes.MEMORY) })
         }
         composable(Routes.SETTINGS) {
-            SettingsScreen(settingsVm, onBack = { nav.popBackStack() }, onOpenMemory = { nav.navigate(Routes.MEMORY) })
+            SettingsScreen(settingsVm, onBack = { nav.popBackStack() }, onOpenMemory = { nav.navigate(Routes.MEMORY) }, onOpenSetup = { nav.navigate(Routes.SETUP) })
+        }
+        composable(Routes.SETUP) {
+            SetupScreen(
+                disclosureAccepted = appSettings?.screenDisclosureAccepted == true,
+                onAcceptDisclosure = settingsVm::acceptScreenDisclosure,
+                onDone = { settingsVm.markSetupSeen(); nav.popBackStack() },
+            )
         }
         composable(Routes.MEMORY) { MemoryScreen(settingsVm, onBack = { nav.popBackStack() }) }
     }

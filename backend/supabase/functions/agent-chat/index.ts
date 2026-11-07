@@ -3,12 +3,13 @@
 //
 // Modes (POST JSON body, field "mode"):
 //   chat   -> streams a model turn (neutral Gemini-style SSE) with the app's function declarations.
-//             Provider: Gemini (GEMINI_API_KEY). OpenAI adapter kept but OFF unless USE_OPENAI=true.
+//             Primary: Gemini (GEMINI_API_KEY). Fallback: OpenAI (OPENAI_API_KEY) when Gemini is rate-limited,
+//             unavailable or times out. Set DISABLE_OPENAI_FALLBACK=true to turn the fallback off.
 //   search -> web search with real source URLs via Tavily (TAVILY_API_KEY); fallback: Gemini grounding
 //   models -> connection check (no provider/model names unless debug=true)
 //
 // Secrets / env:
-//   USE_OPENAI       "true" to make OpenAI primary (default off)   OPENAI_API_KEY / OPENAI_MODEL
+//   OPENAI_API_KEY   fallback provider         OPENAI_MODEL   (default gpt-5.4-mini)
 //   GEMINI_API_KEY   AI provider               GEMINI_MODEL   (default gemini-3.5-flash-lite)
 //   TAVILY_API_KEY   web search                DAILY_REQUEST_LIMIT (default 600)
 //   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are injected by Supabase automatically.
@@ -133,7 +134,7 @@ async function openAIChat(contents: any[], system: string, tools: ToolDecl[], ke
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify(body),
   });
-  console.log("chat primary", res.status);
+  console.log("chat openai(fallback)", res.status);
   if (!res.ok || !res.body) return res;
   return new Response(openAIStreamToNeutral(res.body), { status: 200, headers: sseHeaders });
 }
@@ -152,7 +153,7 @@ async function geminiChat(contents: any[], system: string, tools: ToolDecl[], ke
     headers: { "Content-Type": "application/json", "x-goog-api-key": key },
     body: JSON.stringify(body),
   });
-  console.log("chat fallback", res.status);
+  console.log("chat gemini(primary)", res.status);
   if (!res.ok || !res.body) return res;
   return new Response(res.body, { status: 200, headers: sseHeaders });
 }
@@ -167,28 +168,31 @@ async function handleChat(body: any): Promise<Response> {
   if (typeof tools === "string") return errorResponse(400, "bad_request", tools);
   const system = typeof body.systemInstruction === "string" ? body.systemInstruction.slice(0, MAX_SYSTEM_CHARS) : "";
 
-  const openaiKey = Deno.env.get("USE_OPENAI") === "true" ? Deno.env.get("OPENAI_API_KEY") : undefined;
   const geminiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!openaiKey && !geminiKey) return errorResponse(503, "missing_api_key", "No AI provider key is configured on the server yet.");
+  const openaiKey = Deno.env.get("DISABLE_OPENAI_FALLBACK") === "true" ? undefined : Deno.env.get("OPENAI_API_KEY");
+  if (!geminiKey && !openaiKey) return errorResponse(503, "missing_api_key", "No AI provider key is configured on the server yet.");
 
-  let lastFailure: Response | null = null;
-  if (openaiKey) {
+  // 1) Gemini (primary)
+  let primaryFailure: Response | null = null;
+  if (geminiKey) {
     try {
-      const r = await openAIChat(body.contents, system, tools, openaiKey);
+      const r = await geminiChat(body.contents, system, tools, geminiKey);
       if (r.ok) return r;
-      if (!geminiKey || !RETRYABLE.has(r.status)) return await upstreamError("primary", r);
-      lastFailure = r;
+      if (!openaiKey || !RETRYABLE.has(r.status)) return await upstreamError("primary", r);
+      primaryFailure = r;
       let why = "";
-      try { const b = await r.clone().json(); why = `${b?.error?.code ?? ""} ${b?.error?.type ?? ""} ${String(b?.error?.message ?? "").slice(0, 160)}`; } catch (_) { /* ignore */ }
+      try { const b = await r.clone().json(); why = `${b?.error?.status ?? ""} ${String(b?.error?.message ?? "").slice(0, 160)}`; } catch (_) { /* ignore */ }
       console.warn("primary failed, falling back", r.status, why);
     } catch (e) {
       console.warn("primary threw, falling back", String(e));
-      if (!geminiKey) throw e;
+      if (!openaiKey) throw e;
     }
   }
-  const r = await geminiChat(body.contents, system, tools, geminiKey!);
+
+  // 2) OpenAI (fallback)
+  const r = await openAIChat(body.contents, system, tools, openaiKey!);
   if (r.ok) return r;
-  if (lastFailure) await lastFailure.body?.cancel();
+  if (primaryFailure) await primaryFailure.body?.cancel();
   return await upstreamError("fallback", r);
 }
 
@@ -247,13 +251,13 @@ async function handleSearch(body: any): Promise<Response> {
 /** Connection check. Provider/model names are only included for the owner's debugging (debug=true). */
 // deno-lint-ignore no-explicit-any
 async function handleModels(body: any): Promise<Response> {
-  const openaiKey = Deno.env.get("USE_OPENAI") === "true" ? Deno.env.get("OPENAI_API_KEY") : undefined;
+  const openaiKey = Deno.env.get("DISABLE_OPENAI_FALLBACK") === "true" ? undefined : Deno.env.get("OPENAI_API_KEY");
   const geminiKey = Deno.env.get("GEMINI_API_KEY");
   // deno-lint-ignore no-explicit-any
   const out: any = { ok: Boolean(openaiKey || geminiKey), defaultModel: "fazz", models: [] };
   if (body?.debug === true) {
-    out.primary = openaiKey ? OPENAI_MODEL : null;
-    out.fallback = geminiKey ? GEMINI_MODEL : null;
+    out.primary = geminiKey ? GEMINI_MODEL : null;
+    out.fallback = openaiKey ? OPENAI_MODEL : null;
     out.search = Deno.env.get("TAVILY_API_KEY") ? "tavily" : "gemini-grounding";
     if (openaiKey) {
       const r = await fetch(`${OPENAI_BASE}/models`, { headers: { Authorization: `Bearer ${openaiKey}` } });
