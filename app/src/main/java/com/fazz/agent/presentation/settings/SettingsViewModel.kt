@@ -37,6 +37,7 @@ class SettingsViewModel(private val c: AppContainer) : ViewModel() {
 
     fun setSpeak(v: Boolean) = viewModelScope.launch { c.settings.setSpeakReplies(v) }
     fun setAutoSend(v: Boolean) = viewModelScope.launch { c.settings.setAutoSendVoice(v) }
+    fun setStyle(id: String) = viewModelScope.launch { c.settings.setResponseStyle(id) }
     fun acceptScreenDisclosure() = viewModelScope.launch { c.settings.acceptScreenDisclosure() }
 
     fun setBriefing(enabled: Boolean, hour: Int) = viewModelScope.launch {

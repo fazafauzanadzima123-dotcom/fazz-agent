@@ -70,7 +70,19 @@ data class AppSettings(
     val briefingEnabled: Boolean,
     val briefingHour: Int,
     val screenDisclosureAccepted: Boolean,
+    val responseStyle: String = ResponseStyle.NORMAL.id,
 )
+
+/** How Fazz words its answers (like Claude's response styles). */
+enum class ResponseStyle(val id: String, val label: String, val hint: String) {
+    NORMAL("normal", "Normal", ""),
+    CONCISE("ringkas", "Ringkas", "Style: very concise. Answer in as few words as possible; no preamble, no recap."),
+    FORMAL("formal", "Formal", "Style: formal and professional Indonesian (baku). No slang or emoji."),
+    CASUAL("santai", "Santai", "Style: relaxed, friendly and conversational, like a helpful friend. Light humor is fine."),
+    EXPLAINER("penjelas", "Penjelas", "Style: patient teacher. Explain step by step with simple examples and analogies."),
+    ;
+    companion object { fun from(id: String?) = entries.firstOrNull { it.id == id } ?: NORMAL }
+}
 
 /** High-level agent state for the activity indicator. */
 sealed interface AgentState {

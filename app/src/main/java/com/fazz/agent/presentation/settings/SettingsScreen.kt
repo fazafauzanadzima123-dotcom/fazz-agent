@@ -9,6 +9,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -132,6 +133,15 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onOpenMemory: () -
                         }
                     }
                     TextButton(onClick = vm::runBriefingNow) { Text("Coba briefing sekarang") }
+                }
+            }
+
+            Section("Gaya jawaban") {
+                Text("Atur cara Fazz menjawab di semua chat.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    com.fazz.agent.domain.models.ResponseStyle.entries.forEach { st ->
+                        FilterChip(selected = settings?.responseStyle.orEmpty().ifBlank { "normal" } == st.id, onClick = { vm.setStyle(st.id) }, label = { Text(st.label) })
+                    }
                 }
             }
 

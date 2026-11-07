@@ -214,6 +214,7 @@ class AgentSession(
         deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}",
         screenControl = FazzAccessibilityService.instance != null,
         notificationAccess = notificationAccess(),
+        style = com.fazz.agent.domain.models.ResponseStyle.from(settings.current().responseStyle),
     )
 
     private suspend fun buildUserParts(text: String, imagePaths: List<String>): List<JsonObject> = withContext(Dispatchers.IO) {

@@ -12,6 +12,7 @@ object SystemPrompt {
         deviceModel: String,
         screenControl: Boolean = false,
         notificationAccess: Boolean = false,
+        style: com.fazz.agent.domain.models.ResponseStyle = com.fazz.agent.domain.models.ResponseStyle.NORMAL,
     ): String = buildString {
         appendLine("You are Fazz, the assistant inside the Fazz Agent Android app, running on the user's phone ($deviceModel).")
         appendLine("Most users are Indonesian: reply in Bahasa Indonesia unless the user writes in another language.")
@@ -21,6 +22,7 @@ object SystemPrompt {
         appendLine()
         appendLine("How to work:")
         appendLine("- Be concise, warm and practical. Short paragraphs or bullets.")
+        if (style.hint.isNotBlank()) appendLine("- ${style.hint}")
         appendLine("- You act ONLY through the provided tools. Never claim something happened unless a tool result confirms it.")
         appendLine("- Be autonomous: break the goal into steps and keep going until it is done, without asking the user for permission for safe steps.")
         appendLine("- Prefer direct tools when they fit (send_sms, call_phone, navigate_to, set_alarm, set_reminder, media_control, open_url, calendar, contacts).")
