@@ -51,6 +51,18 @@ Then, in the app: **Settings → Test connection**. It lists the models your key
 
 ## 3. Install on your phone
 
+**Public download page:** <https://orbit-agent-ten.vercel.app> (Vercel project `orbit-agent`; page source in `web/`).
+Redeploy after a new build:
+```
+cp app/build/outputs/apk/debug/app-debug.apk web/orbit-<version>.apk   # and update the link in web/index.html
+npx vercel@latest deploy --prod --yes --scope fazafauzanadzima123-9292s-projects --cwd web
+```
+
+**Model note (verified 2026-11-07):** with the current key, `gemini-3.5-flash-lite` has free quota and
+function calling works end-to-end. `gemini-flash-latest` and Google Search grounding returned
+"quota exceeded" (no free quota on this key), so the app defaults to `gemini-3.5-flash-lite` and the
+web_search tool reports honestly when search is unavailable.
+
 The debug APK is built to `app/build/outputs/apk/debug/app-debug.apk`.
 
 **Option A – copy the file**
