@@ -3,13 +3,13 @@
 //
 // Modes (POST JSON body, field "mode"):
 //   chat   -> streams a model turn (neutral Gemini-style SSE) with the app's function declarations.
-//             Primary: OpenAI (OPENAI_API_KEY). Automatic fallback: Gemini (GEMINI_API_KEY).
+//             Provider: Gemini (GEMINI_API_KEY). OpenAI adapter kept but OFF unless USE_OPENAI=true.
 //   search -> web search with real source URLs via Tavily (TAVILY_API_KEY); fallback: Gemini grounding
 //   models -> connection check (no provider/model names unless debug=true)
 //
 // Secrets / env:
-//   OPENAI_API_KEY   primary provider          OPENAI_MODEL   (default below)
-//   GEMINI_API_KEY   fallback provider         GEMINI_MODEL   (default gemini-3.5-flash-lite)
+//   USE_OPENAI       "true" to make OpenAI primary (default off)   OPENAI_API_KEY / OPENAI_MODEL
+//   GEMINI_API_KEY   AI provider               GEMINI_MODEL   (default gemini-3.5-flash-lite)
 //   TAVILY_API_KEY   web search                DAILY_REQUEST_LIMIT (default 600)
 //   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are injected by Supabase automatically.
 
@@ -167,7 +167,7 @@ async function handleChat(body: any): Promise<Response> {
   if (typeof tools === "string") return errorResponse(400, "bad_request", tools);
   const system = typeof body.systemInstruction === "string" ? body.systemInstruction.slice(0, MAX_SYSTEM_CHARS) : "";
 
-  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  const openaiKey = Deno.env.get("USE_OPENAI") === "true" ? Deno.env.get("OPENAI_API_KEY") : undefined;
   const geminiKey = Deno.env.get("GEMINI_API_KEY");
   if (!openaiKey && !geminiKey) return errorResponse(503, "missing_api_key", "No AI provider key is configured on the server yet.");
 
@@ -247,7 +247,7 @@ async function handleSearch(body: any): Promise<Response> {
 /** Connection check. Provider/model names are only included for the owner's debugging (debug=true). */
 // deno-lint-ignore no-explicit-any
 async function handleModels(body: any): Promise<Response> {
-  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  const openaiKey = Deno.env.get("USE_OPENAI") === "true" ? Deno.env.get("OPENAI_API_KEY") : undefined;
   const geminiKey = Deno.env.get("GEMINI_API_KEY");
   // deno-lint-ignore no-explicit-any
   const out: any = { ok: Boolean(openaiKey || geminiKey), defaultModel: "fazz", models: [] };
