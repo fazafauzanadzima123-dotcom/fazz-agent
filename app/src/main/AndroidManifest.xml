@@ -69,6 +69,10 @@
         </activity>
 
         <!-- Screen control. Only active after the user enables "Fazz Agent" in Settings → Accessibility. -->
+        <receiver
+            android:name=".core.proactive.ApprovalReceiver"
+            android:exported="false" />
+
         <service
             android:name=".core.screen.FazzAccessibilityService"
             android:exported="false"

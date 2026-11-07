@@ -49,7 +49,10 @@ class ControlOverlay(
     fun start() {
         scope.launch {
             combine(container.session.state, container.interaction.pending, AppVisibility.foreground) { s, p, fg -> Triple(s, p, fg) }
-                .collect { (s, pending, fg) -> render(s.isBusy && !fg, s.agentStatus, if (fg) null else pending) }
+                .collect { (s, pending, fg) ->
+                    runCatching { render(s.isBusy && !fg, s.agentStatus, if (fg) null else pending) }
+                        .onFailure { android.util.Log.e("FazzOverlay", "render failed", it); root = null }
+                }
         }
     }
 
@@ -105,7 +108,12 @@ class ControlOverlay(
             y = dp(36)
             horizontalMargin = 0.03f
         }
-        wm.addView(panel, lp)
+        try {
+            wm.addView(panel, lp)
+        } catch (t: Throwable) {
+            android.util.Log.e("FazzOverlay", "addView failed", t)
+            throw t
+        }
         root = panel
         return panel
     }

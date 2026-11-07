@@ -7,6 +7,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
@@ -28,15 +29,19 @@ fun renderMarkdown(text: String, linkColor: Color, codeBg: Color): AnnotatedStri
     }
 }
 
-private val token = Regex("\\*\\*(.+?)\\*\\*|`([^`]+)`|\\[([^\\]]+)]\\((https?://[^)\\s]+)\\)|(https?://[^\\s)]+)")
+private val token = Regex(
+    "\\*\\*(.+?)\\*\\*|`([^`]+)`|\\[([^\\]]+)]\\((https?://[^)\\s]+)\\)|(https?://[^\\s)]+)" +
+        "|(?<![*\\w])[*_](?![\\s*_])([^*_\\n]+?)(?<!\\s)[*_](?![*\\w])",
+)
 
 private fun AnnotatedString.Builder.inline(s: String, linkColor: Color, codeBg: Color) {
     var i = 0
     for (m in token.findAll(s)) {
         append(s.substring(i, m.range.first))
-        val (bold, code, linkText, linkUrl, bareUrl) = m.destructured
+        val (bold, code, linkText, linkUrl, bareUrl, italic) = m.destructured
         val linkStyle = TextLinkStyles(SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline))
         when {
+            italic.isNotEmpty() -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(italic) }
             bold.isNotEmpty() -> withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(bold) }
             code.isNotEmpty() -> withStyle(SpanStyle(fontFamily = FontFamily.Monospace, background = codeBg)) { append(" $code ") }
             linkUrl.isNotEmpty() -> withLink(LinkAnnotation.Url(linkUrl, linkStyle)) { append(linkText) }

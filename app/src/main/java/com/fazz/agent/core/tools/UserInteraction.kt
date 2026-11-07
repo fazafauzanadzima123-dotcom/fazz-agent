@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** How tools reach the human: runtime permission prompts and explicit confirmations. */
 interface UserInteractionGateway {
@@ -27,7 +28,7 @@ sealed interface PendingInteraction {
  * UI-backed gateway: the agent suspends until the user answers a dialog shown by the chat screen.
  * Requests are serialized so only one dialog is visible at a time.
  */
-class InteractionBroker : UserInteractionGateway {
+class InteractionBroker(private val timeoutMs: Long = 3 * 60_000L) : UserInteractionGateway {
     private val mutex = Mutex()
     private val _pending = MutableStateFlow<PendingInteraction?>(null)
     val pending: StateFlow<PendingInteraction?> = _pending.asStateFlow()
@@ -35,13 +36,14 @@ class InteractionBroker : UserInteractionGateway {
     override suspend fun requestPermissions(permissions: List<String>, rationale: String): Boolean = mutex.withLock {
         val deferred = CompletableDeferred<Boolean>()
         _pending.value = PendingInteraction.Permission(permissions, rationale, deferred)
-        try { deferred.await() } finally { _pending.value = null }
+        try { withTimeoutOrNull(timeoutMs) { deferred.await() } ?: false } finally { _pending.value = null }
     }
 
     override suspend fun confirm(request: ConfirmationRequest): Boolean = mutex.withLock {
         val deferred = CompletableDeferred<Boolean>()
         _pending.value = PendingInteraction.Confirmation(request, deferred)
-        try { deferred.await() } finally { _pending.value = null }
+        // Never wait forever: an unanswered approval counts as "Tolak" so the agent can't hang.
+        try { withTimeoutOrNull(timeoutMs) { deferred.await() } ?: false } finally { _pending.value = null }
     }
 
     /** Called by the UI. */

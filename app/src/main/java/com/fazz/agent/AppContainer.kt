@@ -53,6 +53,13 @@ import com.fazz.agent.data.local.ConversationStore
 import com.fazz.agent.data.local.FileMemoryRepository
 import com.fazz.agent.data.local.MemoryRepository
 import com.fazz.agent.data.local.SettingsRepository
+import com.fazz.agent.core.common.AppVisibility
+import com.fazz.agent.core.tools.PendingInteraction
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import java.io.File
 
 /** Manual dependency injection: one place that builds and wires the app's services. */
@@ -124,4 +131,19 @@ class AppContainer(context: Context) {
         notifier = notifier,
         notificationAccess = { notifications.listenerEnabled() },
     )
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    init {
+        // Approvals must always be reachable: in-app dialog when Fazz is visible, otherwise overlay + notification.
+        appScope.launch {
+            combine(interaction.pending, AppVisibility.foreground) { p, fg -> p to fg }.collect { (p, fg) ->
+                if (p is PendingInteraction.Confirmation && !fg) {
+                    notifier.showApproval(p.request.title, p.request.message, p.request.confirmLabel, p.request.denyLabel)
+                } else {
+                    notifier.cancel(Notifier.ID_APPROVAL)
+                }
+            }
+        }
+    }
 }

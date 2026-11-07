@@ -120,6 +120,8 @@ fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit, onOpenMemory: () -
     val voice by vm.voiceState.collectAsStateWithLifecycle()
     val speaking by vm.speaking.collectAsStateWithLifecycle()
     val voiceMode by vm.voiceMode.collectAsStateWithLifecycle()
+    val screenOn by vm.screenControlOn.collectAsStateWithLifecycle()
+    val disclosureAccepted by vm.disclosureAccepted.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val drawer = rememberDrawerState(DrawerValue.Closed)
@@ -143,6 +145,14 @@ fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit, onOpenMemory: () -
         if (ok && f != null) vm.addCameraFile(f)
         cameraFile = null
     }
+
+    var wasOn by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(screenOn) {
+        if (wasOn == false && screenOn) snackbar.showSnackbar("Kontrol layar aktif. Fazz siap bekerja di aplikasi lain.")
+        wasOn = screenOn
+    }
+    val needsScreen = !screenOn && (session.messages.isEmpty() ||
+        session.messages.takeLast(2).any { m -> m.tools.any { it.detail?.contains("Kontrol layar belum aktif") == true } })
 
     LaunchedEffect(voice) {
         val v = voice
@@ -210,6 +220,10 @@ fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit, onOpenMemory: () -
                             }
                         }
                     }
+                }
+                if (needsScreen && composer.text.isBlank() && !session.isBusy) {
+                    ScreenSetupCard(disclosureAccepted, vm::acceptDisclosure, vm::openScreenSetup, Modifier.padding(horizontal = 16.dp))
+                    Spacer(Modifier.height(10.dp))
                 }
                 if (session.messages.isEmpty() && composer.text.isBlank()) {
                     StarterChips(Starters) { vm.onTextChange(it); if (!it.endsWith(" ")) vm.send(it) }

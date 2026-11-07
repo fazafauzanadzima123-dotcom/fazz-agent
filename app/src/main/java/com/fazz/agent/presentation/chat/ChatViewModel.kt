@@ -14,6 +14,7 @@ import com.fazz.agent.data.local.ConversationMeta
 import com.fazz.agent.domain.models.AgentState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +35,11 @@ class ChatViewModel(private val c: AppContainer, private val app: Application) :
     val voiceState: StateFlow<VoiceInputState> = c.speech.state
     val speaking: StateFlow<Boolean> = c.tts.speaking
     val screenControlOn: StateFlow<Boolean> = FazzAccessibilityService.connected
+    val disclosureAccepted: StateFlow<Boolean> = c.settings.settings.map { it.screenDisclosureAccepted }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun acceptDisclosure() { viewModelScope.launch { c.settings.acceptScreenDisclosure() } }
+    fun openScreenSetup() = com.fazz.agent.core.screen.ScreenSetup.open(app)
 
     private val _composer = MutableStateFlow(ComposerState())
     val composer: StateFlow<ComposerState> = _composer.asStateFlow()

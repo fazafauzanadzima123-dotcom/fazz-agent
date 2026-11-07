@@ -19,7 +19,7 @@ fun interface ScreenControllerProvider {
 
 private val notEnabled = ToolResult.error(
     "accessibility_disabled",
-    "Kontrol layar belum aktif. [Model: tell the user to enable it in Fazz → Pengaturan → Kontrol layar, then stop.]",
+    "Kontrol layar belum aktif. [Model: tell the user to tap the 'Aktifkan kontrol layar' button shown below the chat (one switch, Fazz returns automatically), then stop.]",
 )
 
 /** Waits for the UI to settle after an action, then returns the new screen so the model sees the effect. */

@@ -23,6 +23,7 @@ class Notifier(private val context: Context) {
         const val ID_AGENT = 1001
         const val ID_ALERT = 1002
         const val ID_BRIEFING = 1003
+        const val ID_APPROVAL = 1004
         const val EXTRA_CONVERSATION = "conversation_id"
     }
 
@@ -61,4 +62,22 @@ class Notifier(private val context: Context) {
     }
 
     fun cancel(id: Int) = NotificationManagerCompat.from(context).cancel(id)
+
+    private fun action(action: String, code: Int): PendingIntent = PendingIntent.getBroadcast(
+        context, code, Intent(context, ApprovalReceiver::class.java).setAction(action),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
+
+    /** Approval request while Fazz works in another app; a backup to the floating panel. */
+    fun showApproval(title: String, message: String, confirmLabel: String, denyLabel: String) {
+        val b = base(CH_ALERT, title, message)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setOngoing(true)
+            .setContentIntent(openAppIntent(requestCode = 40))
+            .addAction(0, denyLabel, action(ApprovalReceiver.ACTION_DENY, 41))
+            .addAction(0, confirmLabel, action(ApprovalReceiver.ACTION_APPROVE, 42))
+            .addAction(0, "STOP", action(ApprovalReceiver.ACTION_STOP, 43))
+        post(ID_APPROVAL, b)
+    }
 }

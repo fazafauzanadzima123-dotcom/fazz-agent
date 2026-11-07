@@ -12,6 +12,8 @@ import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.fazz.agent.FazzApp
+import com.fazz.agent.MainActivity
+import com.fazz.agent.core.common.AppVisibility
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -52,6 +54,16 @@ class FazzAccessibilityService : AccessibilityService() {
         scope = s
         val container = (application as FazzApp).container
         overlay = ControlOverlay(this, container, s).also { it.start() }
+        if (AppVisibility.returnAfterAccessibilitySetup) {
+            AppVisibility.returnAfterAccessibilitySetup = false
+            runCatching {
+                startActivity(
+                    Intent(this, MainActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                        .putExtra(MainActivity.EXTRA_SCREEN_READY, true),
+                )
+            }
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit

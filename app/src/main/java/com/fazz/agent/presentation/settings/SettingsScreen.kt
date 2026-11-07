@@ -100,7 +100,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onOpenMemory: () -
             Section("Kontrol layar") {
                 StatusRow(screenOn, if (screenOn) "Aktif. Fazz bisa mengoperasikan aplikasi lain saat kamu memintanya." else "Belum aktif. Tanpa ini Fazz hanya bisa membuka aplikasi, bukan mengetuk atau mengetik di dalamnya.")
                 if (!screenOn) {
-                    Button(onClick = { if (settings?.screenDisclosureAccepted == true) open(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) else showDisclosure = true }) { Text("Aktifkan kontrol layar") }
+                    Button(onClick = { if (settings?.screenDisclosureAccepted == true) com.fazz.agent.core.screen.ScreenSetup.open(context) else showDisclosure = true }) { Text("Aktifkan kontrol layar") }
                     if (Build.VERSION.SDK_INT >= 33) Text(
                         "Jika tombol Fazz di Aksesibilitas tidak bisa diaktifkan (\"setelan terbatas\"): buka Info aplikasi Fazz Agent → menu ⋮ → \"Izinkan setelan terbatas\", lalu coba lagi.",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -210,7 +210,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onOpenMemory: () -
             )
         },
         confirmButton = {
-            TextButton(onClick = { vm.acceptScreenDisclosure(); showDisclosure = false; open(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }) { Text("Setuju & buka") }
+            TextButton(onClick = { vm.acceptScreenDisclosure(); showDisclosure = false; com.fazz.agent.core.screen.ScreenSetup.open(context) }) { Text("Setuju & buka") }
         },
         dismissButton = { TextButton(onClick = { showDisclosure = false }) { Text("Batal") } },
     )

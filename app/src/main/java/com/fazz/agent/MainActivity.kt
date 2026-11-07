@@ -21,11 +21,15 @@ import com.fazz.agent.presentation.navigation.AppNavHost
 import com.fazz.agent.presentation.theme.FazzTheme
 
 class MainActivity : ComponentActivity() {
+    companion object { const val EXTRA_SCREEN_READY = "screen_ready" }
+
     private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        // 3-button navigation otherwise gets a white "contrast" scrim; keep the cream background visible.
+        if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         handleIntent(intent)
         if (savedInstanceState == null && Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
@@ -45,8 +49,8 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
     }
 
-    override fun onStart() { super.onStart(); AppVisibility.set(true) }
-    override fun onStop() { AppVisibility.set(false); super.onStop() }
+    override fun onStart() { super.onStart(); AppVisibility.onStart() }
+    override fun onStop() { AppVisibility.onStop(); super.onStop() }
 
     /** Opening a notification (briefing, finished task) jumps to that conversation. */
     private fun handleIntent(intent: Intent?) {
