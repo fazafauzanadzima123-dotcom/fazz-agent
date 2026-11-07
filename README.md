@@ -16,7 +16,7 @@
 
 ## Bahasa Indonesia
 
-### Fitur (v0.2.0)
+### Fitur (v0.3.0)
 
 | Kamu bilang | Yang Fazz lakukan | Izin |
 |---|---|---|
@@ -27,11 +27,16 @@
 | "Pasang timer 10 menit" | Timer di aplikasi Jam | – |
 | "Baterai tinggal berapa?" | Baterai, jaringan, penyimpanan | – |
 | "Cari berita AI terbaru" | Pencarian web dengan sumber (tergantung kuota Gemini) | – |
+| "Buka YouTube dan cari lagu Tulus" | Mengoperasikan aplikasi lain lewat kontrol layar (aksesibilitas), dengan tombol STOP | Kontrol layar |
+| "Kirim WhatsApp ke Budi: telat 10 menit" | Menyiapkan pesan, lalu minta persetujuanmu sebelum menekan Kirim | Kontrol layar + persetujuan |
+| "Buatkan kalkulator cicilan" | Artefak: halaman web/dokumen/kode yang bisa dibuka, disalin, dibagikan | – |
 | "Ingat, aku suka jawaban singkat" | Disimpan ke memori di HP setelah disetujui | Persetujuan |
 
 Lainnya: jawaban streaming, input suara (SpeechRecognizer) dengan indikator mikrofon, jawaban dibacakan (TextToSpeech), riwayat chat, memori yang bisa dilihat/dihapus, tampilan krem minimalis dengan mode gelap otomatis, seluruh UI berbahasa Indonesia.
 
-**Belum ada:** panggilan suara "Hai Fazz", mendengarkan di latar belakang, membaca layar aplikasi lain.
+Baru di v0.3.0: kontrol layar dengan persetujuan sebelum tindakan tak bisa dibatalkan (lewat dialog, panel melayang, atau notifikasi), penyiapan izin sejak pertama dibuka, riwayat banyak chat, gaya jawaban, artefak, mode suara, dan [Fazz Academy](https://fazz-agent.vercel.app/academy/). Model AI utama Gemini dengan cadangan otomatis; kunci hanya ada di server.
+
+**Belum ada:** panggilan suara "Hai Fazz", mendengarkan di latar belakang, Projects.
 
 ### Cara pasang
 
