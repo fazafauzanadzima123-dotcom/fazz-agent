@@ -9,7 +9,7 @@ import org.junit.Test
 import java.time.ZonedDateTime
 
 class ResponseStyleTest {
-    private fun prompt(style: ResponseStyle) = SystemPrompt.build(ZonedDateTime.now(), emptyList(), "Test", style = style)
+    private fun prompt(style: ResponseStyle) = SystemPrompt.build(ZonedDateTime.now(), emptyList(), "Test", profile = com.fazz.agent.domain.models.Profile(style = style))
 
     @Test fun unknownIdFallsBackToNormal() {
         assertEquals(ResponseStyle.NORMAL, ResponseStyle.from("???"))

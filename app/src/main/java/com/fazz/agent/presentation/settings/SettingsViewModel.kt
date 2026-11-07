@@ -37,6 +37,12 @@ class SettingsViewModel(private val c: AppContainer) : ViewModel() {
 
     fun setSpeak(v: Boolean) = viewModelScope.launch { c.settings.setSpeakReplies(v) }
     fun setAutoSend(v: Boolean) = viewModelScope.launch { c.settings.setAutoSendVoice(v) }
+    fun savePersonal(nickname: String, about: String, instructions: String) = viewModelScope.launch { c.settings.setPersonal(nickname.trim(), about.trim(), instructions.trim()) }
+    fun setTone(id: String) = viewModelScope.launch { c.settings.setTone(id) }
+    fun setAnswerLength(id: String) = viewModelScope.launch { c.settings.setAnswerLength(id) }
+    fun setEmoji(id: String) = viewModelScope.launch { c.settings.setEmoji(id) }
+    fun setLocationAllowed(v: Boolean) = viewModelScope.launch { c.settings.setLocationAllowed(v) }
+    fun setPluginEnabled(id: String, enabled: Boolean) = viewModelScope.launch { c.settings.setPluginEnabled(id, enabled) }
     fun markSetupSeen() = viewModelScope.launch { c.settings.markSetupSeen() }
     fun setStyle(id: String) = viewModelScope.launch { c.settings.setResponseStyle(id) }
     fun acceptScreenDisclosure() = viewModelScope.launch { c.settings.acceptScreenDisclosure() }

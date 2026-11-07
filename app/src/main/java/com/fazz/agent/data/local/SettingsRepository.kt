@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.fazz.agent.domain.models.Profile
 import androidx.datastore.preferences.preferencesDataStore
 import com.fazz.agent.domain.models.AppSettings
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +27,14 @@ class SettingsRepository(private val context: Context) {
         val screenDisclosure = booleanPreferencesKey("screen_disclosure_accepted")
         val style = stringPreferencesKey("response_style")
         val setupSeen = booleanPreferencesKey("setup_seen")
+        val nickname = stringPreferencesKey("nickname")
+        val about = stringPreferencesKey("about")
+        val instructions = stringPreferencesKey("instructions")
+        val tone = stringPreferencesKey("tone")
+        val length = stringPreferencesKey("answer_length")
+        val emoji = stringPreferencesKey("emoji")
+        val location = booleanPreferencesKey("location_allowed")
+        val disabledPlugins = stringSetPreferencesKey("disabled_plugins")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -37,6 +47,14 @@ class SettingsRepository(private val context: Context) {
             screenDisclosureAccepted = p[Keys.screenDisclosure] ?: false,
             responseStyle = p[Keys.style] ?: "normal",
             setupSeen = p[Keys.setupSeen] ?: false,
+            nickname = p[Keys.nickname].orEmpty(),
+            about = p[Keys.about].orEmpty(),
+            instructions = p[Keys.instructions].orEmpty(),
+            tone = p[Keys.tone] ?: "netral",
+            answerLength = p[Keys.length] ?: "otomatis",
+            emoji = p[Keys.emoji] ?: "sedikit",
+            locationAllowed = p[Keys.location] ?: false,
+            disabledPlugins = p[Keys.disabledPlugins] ?: emptySet(),
         )
     }
 
@@ -53,6 +71,19 @@ class SettingsRepository(private val context: Context) {
     suspend fun setSpeakReplies(v: Boolean) = context.dataStore.edit { it[Keys.speak] = v }
     suspend fun setAutoSendVoice(v: Boolean) = context.dataStore.edit { it[Keys.autoSend] = v }
     suspend fun setBriefing(enabled: Boolean, hour: Int) = context.dataStore.edit { it[Keys.briefingOn] = enabled; it[Keys.briefingHour] = hour }
+    suspend fun setPersonal(nickname: String, about: String, instructions: String) = context.dataStore.edit {
+        it[Keys.nickname] = nickname.take(Profile.MAX_NICKNAME)
+        it[Keys.about] = about.take(Profile.MAX_ABOUT)
+        it[Keys.instructions] = instructions.take(Profile.MAX_INSTRUCTIONS)
+    }
+    suspend fun setTone(id: String) = context.dataStore.edit { it[Keys.tone] = id }
+    suspend fun setAnswerLength(id: String) = context.dataStore.edit { it[Keys.length] = id }
+    suspend fun setEmoji(id: String) = context.dataStore.edit { it[Keys.emoji] = id }
+    suspend fun setLocationAllowed(v: Boolean) = context.dataStore.edit { it[Keys.location] = v }
+    suspend fun setPluginEnabled(id: String, enabled: Boolean) = context.dataStore.edit {
+        val cur = it[Keys.disabledPlugins] ?: emptySet()
+        it[Keys.disabledPlugins] = if (enabled) cur - id else cur + id
+    }
     suspend fun markSetupSeen() = context.dataStore.edit { it[Keys.setupSeen] = true }
     suspend fun setResponseStyle(id: String) = context.dataStore.edit { it[Keys.style] = id }
     suspend fun acceptScreenDisclosure() = context.dataStore.edit { it[Keys.screenDisclosure] = true }

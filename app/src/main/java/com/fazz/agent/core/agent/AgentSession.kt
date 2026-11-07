@@ -208,14 +208,19 @@ class AgentSession(
         return BackgroundResult(sb.toString(), error, id)
     }
 
-    private suspend fun systemPrompt(): String = SystemPrompt.build(
-        now = ZonedDateTime.now(),
-        memories = memory.items.value,
-        deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}",
-        screenControl = FazzAccessibilityService.instance != null,
-        notificationAccess = notificationAccess(),
-        style = com.fazz.agent.domain.models.ResponseStyle.from(settings.current().responseStyle),
-    )
+    private suspend fun systemPrompt(): String {
+        val s = settings.current()
+        val off = s.disabledPlugins.mapNotNull(com.fazz.agent.domain.models.PluginGroup::from)
+        return SystemPrompt.build(
+            now = ZonedDateTime.now(),
+            memories = memory.items.value,
+            deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}",
+            screenControl = FazzAccessibilityService.instance != null && com.fazz.agent.domain.models.PluginGroup.SCREEN !in off,
+            notificationAccess = notificationAccess(),
+            profile = s.profile,
+            disabledPlugins = off.map { it.label },
+        )
+    }
 
     private suspend fun buildUserParts(text: String, imagePaths: List<String>): List<JsonObject> = withContext(Dispatchers.IO) {
         val parts = mutableListOf<JsonObject>()

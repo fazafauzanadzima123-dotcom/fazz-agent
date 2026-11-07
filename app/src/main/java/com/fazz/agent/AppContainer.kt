@@ -38,6 +38,7 @@ import com.fazz.agent.core.tools.impl.NavigateTool
 import com.fazz.agent.core.tools.impl.OpenAppTool
 import com.fazz.agent.core.tools.impl.OpenUrlTool
 import com.fazz.agent.core.tools.impl.CreateArtifactTool
+import com.fazz.agent.core.tools.impl.GetLocationTool
 import com.fazz.agent.core.tools.impl.ReadCalendarTool
 import com.fazz.agent.core.tools.impl.ReadNotificationsTool
 import com.fazz.agent.core.tools.impl.RememberTool
@@ -100,13 +101,19 @@ class AppContainer(context: Context) {
         ReadScreenTool(screen), TapTool(screen), TypeTextTool(screen), ScrollTool(screen), PressKeyTool(screen),
         SwipeTool(screen), LookAtScreenTool(screen), WaitTool(),
         // Memory & approval
-        RememberTool(memory), AskConfirmationTool(gateway), CreateArtifactTool(),
+        RememberTool(memory), AskConfirmationTool(gateway), CreateArtifactTool(), GetLocationTool(app),
     )
 
     val toolRegistry = ToolRegistry(allTools(interaction))
     val toolExecutor = ToolExecutor(toolRegistry, permissions, interaction)
 
-    private fun interactiveOrchestrator() = AgentOrchestrator(aiService, toolRegistry, toolExecutor, maxSteps = 30)
+    /** Tools the user switched off in Sesuaikan; kept current from settings. */
+    @Volatile private var disabledTools: Set<String> = setOf(com.fazz.agent.domain.models.LOCATION_TOOL)
+
+    private fun interactiveOrchestrator(): AgentOrchestrator {
+        val registry = ToolRegistry(allTools(interaction).filter { it.name !in disabledTools })
+        return AgentOrchestrator(aiService, registry, ToolExecutor(registry, permissions, interaction), maxSteps = 30)
+    }
 
     /**
      * Background (no UI) runs: only the given read-only tools, and sharing data with the AI is pre-approved
@@ -136,6 +143,7 @@ class AppContainer(context: Context) {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     init {
+        appScope.launch { settings.settings.collect { disabledTools = it.disabledTools } }
         // Approvals must always be reachable: in-app dialog when Fazz is visible, otherwise overlay + notification.
         appScope.launch {
             combine(interaction.pending, AppVisibility.foreground) { p, fg -> p to fg }.collect { (p, fg) ->

@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.VolumeOff
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteOutline
@@ -113,7 +114,7 @@ private val Starters = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit, onOpenMemory: () -> Unit) {
+fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit, onOpenMemory: () -> Unit, onOpenCustomize: () -> Unit = {}) {
     val session by vm.session.collectAsStateWithLifecycle()
     val conversations by vm.conversations.collectAsStateWithLifecycle()
     val composer by vm.composer.collectAsStateWithLifecycle()
@@ -179,6 +180,7 @@ fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit, onOpenMemory: () -
                 onOpen = { vm.openConversation(it); scope.launch { drawer.close() } },
                 onDelete = vm::deleteConversation,
                 onSettings = { scope.launch { drawer.close() }; onOpenSettings() },
+                onCustomize = { scope.launch { drawer.close() }; onOpenCustomize() },
                 onMemory = { scope.launch { drawer.close() }; onOpenMemory() },
             )
         },
@@ -334,6 +336,7 @@ private fun HistoryDrawer(
     onOpen: (String) -> Unit,
     onDelete: (String) -> Unit,
     onSettings: () -> Unit,
+    onCustomize: () -> Unit,
     onMemory: () -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
@@ -401,6 +404,7 @@ private fun HistoryDrawer(
             DrawerItem(Icons.Rounded.School, "Fazz Academy") {
                 runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://fazz-agent.vercel.app/academy/")).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
             }
+            DrawerItem(Icons.Rounded.AutoAwesome, "Sesuaikan", onCustomize)
             DrawerItem(Icons.Rounded.Tune, "Pengaturan", onSettings)
             Spacer(Modifier.height(10.dp))
         }

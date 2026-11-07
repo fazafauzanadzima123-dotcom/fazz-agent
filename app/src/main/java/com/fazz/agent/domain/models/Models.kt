@@ -72,7 +72,25 @@ data class AppSettings(
     val screenDisclosureAccepted: Boolean,
     val responseStyle: String = ResponseStyle.NORMAL.id,
     val setupSeen: Boolean = false,
-)
+    val nickname: String = "",
+    val about: String = "",
+    val instructions: String = "",
+    val tone: String = Tone.NEUTRAL.id,
+    val answerLength: String = AnswerLength.AUTO.id,
+    val emoji: String = EmojiLevel.LIGHT.id,
+    val locationAllowed: Boolean = false,
+    val disabledPlugins: Set<String> = emptySet(),
+) {
+    val profile: Profile
+        get() = Profile(nickname, about, instructions, ResponseStyle.from(responseStyle), Tone.from(tone), AnswerLength.from(answerLength), EmojiLevel.from(emoji))
+
+    /** Tool names the user has switched off (plugins) or not allowed (location). */
+    val disabledTools: Set<String>
+        get() = buildSet {
+            disabledPlugins.mapNotNull(PluginGroup::from).forEach { addAll(it.tools) }
+            if (!locationAllowed) add(LOCATION_TOOL)
+        }
+}
 
 /** How Fazz words its answers (like Claude's response styles). */
 enum class ResponseStyle(val id: String, val label: String, val hint: String) {

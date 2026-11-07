@@ -137,30 +137,9 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onOpenMemory: () -
                 }
             }
 
-            Section("Gaya jawaban") {
-                Text("Atur cara Fazz menjawab di semua chat.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    com.fazz.agent.domain.models.ResponseStyle.entries.forEach { st ->
-                        FilterChip(selected = settings?.responseStyle.orEmpty().ifBlank { "normal" } == st.id, onClick = { vm.setStyle(st.id) }, label = { Text(st.label) })
-                    }
-                }
-            }
-
             Section("Suara") {
                 ToggleRow("Bacakan jawaban", "Selalu bacakan jawaban dengan suara. (Pertanyaan lewat suara selalu dijawab dengan suara.)", settings?.speakReplies == true, vm::setSpeak)
                 ToggleRow("Kirim suara otomatis", "Langsung kirim begitu kamu selesai bicara.", settings?.autoSendVoice != false, vm::setAutoSend)
-            }
-
-            Section("Memori") {
-                Surface(onClick = onOpenMemory, color = MaterialTheme.colorScheme.background, shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
-                    Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text("Memori tersimpan", style = MaterialTheme.typography.titleSmall)
-                            Text("${memories.size} item, hanya tersimpan di HP ini", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
-                    }
-                }
             }
 
             Section("Izin aplikasi") {
