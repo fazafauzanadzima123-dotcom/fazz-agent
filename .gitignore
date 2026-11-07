@@ -1,0 +1,17 @@
+.gradle/
+build/
+/local.properties
+/secrets.properties
+.idea/
+*.iml
+.DS_Store
+captures/
+.kotlin/
+.claude/
+*.apk
+*.aab
+*.keystore
+*.jks
+.env
+backend/supabase/.env
+backend/supabase/.temp/
