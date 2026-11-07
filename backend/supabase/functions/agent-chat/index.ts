@@ -1,4 +1,4 @@
-// Orbit agent backend: a thin, validating proxy between the Android app and Google Gemini.
+// Fazz Agent backend: a thin, validating proxy between the Android app and Google Gemini.
 // The Gemini API key lives ONLY here, in the GEMINI_API_KEY secret. It is never sent to the app.
 //
 // Modes (POST JSON body, field "mode"):
@@ -181,7 +181,7 @@ async function handleChat(body: any, apiKey: string): Promise<Response> {
       ...corsHeaders,
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
-      "X-Orbit-Model": model,
+      "X-Fazz-Model": model,
     },
   });
 }

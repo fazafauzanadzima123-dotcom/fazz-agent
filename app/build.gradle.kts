@@ -15,15 +15,15 @@ val secrets = Properties().apply {
 fun secret(name: String): String = (secrets.getProperty(name) ?: System.getenv(name) ?: "").trim()
 
 android {
-    namespace = "com.orbit.agent"
+    namespace = "com.fazz.agent"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.orbit.agent"
+        applicationId = "com.fazz.agent"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.2.0"
 
         buildConfigField("String", "SUPABASE_URL", "\"${secret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secret("SUPABASE_ANON_KEY")}\"")
@@ -49,6 +49,12 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.maxHeapSize = "1536m"
+            // Screenshot tests (Roborazzi) only write PNGs when -Proborazzi.record=true is passed.
+            it.systemProperty("roborazzi.test.record", (project.findProperty("roborazzi.record") ?: "false").toString())
+        }
     }
 }
 
@@ -74,4 +80,12 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.rule)
+    testImplementation(libs.androidx.junit)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }

@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "OrbitAgent"
+rootProject.name = "FazzAgent"
 include(":app")
