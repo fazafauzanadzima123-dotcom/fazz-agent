@@ -61,7 +61,7 @@ class AgentOrchestrator(
                 var stepUsage: AiStreamEvent.Usage? = null
                 var finishReason: String? = null
 
-                val request = ChatRequest(model, systemInstruction, HistoryTrimmer.trim(contents), registry.declarations())
+                val request = ChatRequest(model, systemInstruction, HistoryTrimmer.trim(contents.toList()).toList(), registry.declarations())
                 ai.streamChat(request).collect { ev ->
                     when (ev) {
                         is AiStreamEvent.TextDelta -> {

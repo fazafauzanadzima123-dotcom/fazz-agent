@@ -21,7 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddComment
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.VolumeOff
+import androidx.compose.material.icons.automirrored.rounded.VolumeOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -104,7 +104,7 @@ fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit) {
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 navigationIcon = {
                     IconButton(onClick = vm::newChat, enabled = state.messages.isNotEmpty()) { Icon(Icons.Rounded.AddComment, "New chat") }
                 },
@@ -119,7 +119,7 @@ fun ChatScreen(vm: ChatViewModel, onOpenSettings: () -> Unit) {
                     }
                 },
                 actions = {
-                    if (speaking) IconButton(onClick = vm::stopSpeaking) { Icon(Icons.Rounded.VolumeOff, "Stop speaking") }
+                    if (speaking) IconButton(onClick = vm::stopSpeaking) { Icon(Icons.AutoMirrored.Rounded.VolumeOff, "Stop speaking") }
                     IconButton(onClick = onOpenSettings) { Icon(Icons.Rounded.Settings, "Settings") }
                 },
             )

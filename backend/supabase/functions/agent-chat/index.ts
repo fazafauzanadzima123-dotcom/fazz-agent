@@ -65,7 +65,7 @@ async function mapUpstreamError(res: Response): Promise<Response> {
   } catch (_) { /* ignore */ }
   const lower = detail.toLowerCase();
   if (res.status === 400 && lower.includes("api key")) {
-    return errorResponse(401, "invalid_api_key", "The server's Gemini API key is invalid. Update the GEMINI_API_KEY secret.");
+    return errorResponse(401, "invalid_api_key", "Gemini rejected GEMINI_API_KEY: " + detail.slice(0, 160));
   }
   if (res.status === 401 || res.status === 403) {
     return errorResponse(401, "invalid_api_key", "Gemini rejected the server's API key (" + res.status + ").");
